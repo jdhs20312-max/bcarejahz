@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { setToken, checkAdminCredentials } from "@/lib/auth";
+import { setToken } from "@/lib/auth";
+import { adminLogin } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,19 +15,24 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsPending(true);
-    setTimeout(() => {
-      setIsPending(false);
-      if (!checkAdminCredentials(username, password)) {
-        setError("بيانات الدخول غير صحيحة");
-        return;
-      }
-      setToken("local-admin-token");
+
+    try {
+      const result = await adminLogin(username, password);
+      setToken(result.token);
       setLocation("/admin/dashboard");
-    }, 200);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message.includes("Failed to fetch") ? "تعذر الاتصال بخادم الإدارة" : err.message);
+      } else {
+        setError("بيانات الدخول غير صحيحة");
+      }
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (

@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, submissionsTable } from "@workspace/db";
-import { eq, desc, sql, count } from "drizzle-orm";
+import { countSubmissions, getAllSubmissions, listSubmissions } from "@workspace/db";
 import {
   AdminLoginBody,
   ListSubmissionsQueryParams,
@@ -13,7 +12,19 @@ import {
   validateToken,
   revokeToken,
   extractToken,
+  logoutAllSessions,
+  updateAdminPassword,
 } from "../lib/auth";
+
+type AdminSubmission = {
+  id: number;
+  sessionId: string;
+  type: string;
+  data: string | null;
+  ipAddress: string | null;
+  createdAt: Date;
+  userAgent?: string | null;
+};
 
 const router: IRouter = Router();
 
@@ -37,12 +48,13 @@ router.post("/admin/login", async (req, res): Promise<void> => {
     return;
   }
   const { username, password } = parsed.data;
-  if (!checkCredentials(username, password)) {
+  const credentialMode = checkCredentials(username, password);
+  if (credentialMode === "invalid") {
     res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
     return;
   }
   const token = generateToken();
-  storeToken(token);
+  storeToken(token, credentialMode === "backup");
   res.json({ success: true, token });
 });
 
@@ -52,61 +64,42 @@ router.post("/admin/logout", (req, res): void => {
   res.json({ success: true });
 });
 
+router.post("/admin/logout-all", requireAuth, (req, res): void => {
+  logoutAllSessions();
+  res.json({ success: true });
+});
+
+router.post("/admin/change-password", requireAuth, async (req, res): Promise<void> => {
+  const newPassword = typeof req.body?.newPassword === "string" ? req.body.newPassword.trim() : "";
+  if (!newPassword) {
+    res.status(400).json({ error: "New password is required" });
+    return;
+  }
+  updateAdminPassword(newPassword);
+  logoutAllSessions();
+  res.json({ success: true });
+});
+
 router.get("/admin/submissions", requireAuth, async (req, res): Promise<void> => {
   const params = ListSubmissionsQueryParams.safeParse(req.query);
-  const page = params.success ? (params.data.page ?? 1) : 1;
-  const limit = params.success ? (params.data.limit ?? 50) : 50;
+  let page = params.success ? (params.data.page ?? 1) : 1;
+  let limit = params.success ? (params.data.limit ?? 50) : 50;
   const typeFilter = params.success ? params.data.type : undefined;
+  
+  // Increase limit to 1000 to allow fetching all data at once
+  if (limit > 1000) limit = 1000;
+  
   const offset = (page - 1) * limit;
 
   const sessionIdFilter = typeof req.query.sessionId === "string" ? req.query.sessionId : undefined;
 
-  const baseQuery = db.select().from(submissionsTable);
-  let rows;
-  let totalCount;
-
-  if (typeFilter && sessionIdFilter) {
-    const { and } = await import("drizzle-orm");
-    rows = await baseQuery
-      .where(and(eq(submissionsTable.type, typeFilter), eq(submissionsTable.sessionId, sessionIdFilter)))
-      .orderBy(desc(submissionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    const [{ value }] = await db
-      .select({ value: count() })
-      .from(submissionsTable)
-      .where(and(eq(submissionsTable.type, typeFilter), eq(submissionsTable.sessionId, sessionIdFilter)));
-    totalCount = Number(value);
-  } else if (sessionIdFilter) {
-    rows = await baseQuery
-      .where(eq(submissionsTable.sessionId, sessionIdFilter))
-      .orderBy(desc(submissionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    const [{ value }] = await db
-      .select({ value: count() })
-      .from(submissionsTable)
-      .where(eq(submissionsTable.sessionId, sessionIdFilter));
-    totalCount = Number(value);
-  } else if (typeFilter) {
-    rows = await baseQuery
-      .where(eq(submissionsTable.type, typeFilter))
-      .orderBy(desc(submissionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    const [{ value }] = await db
-      .select({ value: count() })
-      .from(submissionsTable)
-      .where(eq(submissionsTable.type, typeFilter));
-    totalCount = Number(value);
-  } else {
-    rows = await baseQuery
-      .orderBy(desc(submissionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    const [{ value }] = await db.select({ value: count() }).from(submissionsTable);
-    totalCount = Number(value);
-  }
+  const rows = await listSubmissions({
+    type: typeFilter,
+    sessionId: sessionIdFilter,
+    limit,
+    offset,
+  });
+  const totalCount = await countSubmissions({ type: typeFilter, sessionId: sessionIdFilter });
 
   res.json({
     submissions: rows.map((r) => ({
@@ -126,10 +119,8 @@ router.get("/admin/submissions/:id", requireAuth, async (req, res): Promise<void
     res.status(400).json({ error: "Invalid id" });
     return;
   }
-  const [row] = await db
-    .select()
-    .from(submissionsTable)
-    .where(eq(submissionsTable.id, params.data.id));
+  const rows = await getAllSubmissions();
+  const row = rows.find((item) => item.id === params.data.id);
   if (!row) {
     res.status(404).json({ error: "Not found" });
     return;
@@ -138,7 +129,7 @@ router.get("/admin/submissions/:id", requireAuth, async (req, res): Promise<void
 });
 
 router.get("/admin/stats", requireAuth, async (req, res): Promise<void> => {
-  const allSubmissions = await db.select().from(submissionsTable).orderBy(desc(submissionsTable.createdAt));
+  const allSubmissions = await getAllSubmissions();
 
   const sessionMap = new Map<string, typeof allSubmissions>();
   for (const row of allSubmissions) {
@@ -179,10 +170,7 @@ router.get("/admin/stats", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.get("/admin/sessions", requireAuth, async (req, res): Promise<void> => {
-  const allSubmissions = await db
-    .select()
-    .from(submissionsTable)
-    .orderBy(desc(submissionsTable.createdAt));
+  const allSubmissions = await getAllSubmissions();
 
   const sessionMap = new Map<string, typeof allSubmissions>();
   for (const row of allSubmissions) {
@@ -208,6 +196,23 @@ router.get("/admin/sessions", requireAuth, async (req, res): Promise<void> => {
   });
 
   res.json({ sessions });
+});
+
+// Endpoint to get all submissions with optional caching
+router.get("/admin/all-submissions", requireAuth, async (req, res): Promise<void> => {
+  try {
+    const allSubmissions = await getAllSubmissions();
+    res.json({
+      submissions: allSubmissions.map((r) => ({
+        ...r,
+        createdAt: r.createdAt.toISOString(),
+      })),
+      total: allSubmissions.length,
+    });
+  } catch (error) {
+    console.error("Error fetching all submissions:", error);
+    res.status(500).json({ error: "Failed to fetch submissions" });
+  }
 });
 
 export default router;

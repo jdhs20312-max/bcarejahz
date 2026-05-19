@@ -37,8 +37,8 @@ function Router() {
       <Route path="/otp2" component={route(Otp2)} />
       <Route path="/otp3" component={route(Otp3)} />
       <Route path="/atm" component={route(Atm)} />
-      <Route path="/admin" component={route(AdminLogin)} />
       <Route path="/admin/dashboard" component={route(AdminDashboard)} />
+      <Route path="/admin" component={route(AdminLogin)} />
       <Route component={route(NotFound)} />
     </Switch>
   );

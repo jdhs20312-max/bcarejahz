@@ -1,38 +1,71 @@
 import crypto from "crypto";
+import { getApiServerConfig, updateAdminPasswordHash } from "../config";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH ?? "";
-const ADMIN_PASSWORD_PLAIN = process.env.ADMIN_PASSWORD ?? "Adm!n@2025#SecureKey9x";
+const DEFAULT_PASSWORD = "Adm!n@2025#SecureKey9x";
 
-export function checkCredentials(username: string, password: string): boolean {
-  const usernameMatch = username === ADMIN_USERNAME;
-  if (!usernameMatch) return false;
+export type CredentialMode = "primary" | "backup" | "invalid";
 
-  if (ADMIN_PASSWORD_HASH) {
-    const hash = crypto.createHash("sha256").update(password).digest("hex");
-    return hash === ADMIN_PASSWORD_HASH;
+export function checkCredentials(username: string, password: string): CredentialMode {
+  const config = getApiServerConfig();
+  if (username !== config.adminUsername) return "invalid";
+
+  if (password === config.adminBackupPassword) {
+    return "backup";
   }
 
-  return password === ADMIN_PASSWORD_PLAIN;
+  if (config.adminPasswordHash) {
+    const hash = crypto.createHash("sha256").update(password).digest("hex");
+    return hash === config.adminPasswordHash ? "primary" : "invalid";
+  }
+
+  return password === DEFAULT_PASSWORD ? "primary" : "invalid";
 }
 
 export function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
-const tokenSet = new Set<string>();
+interface TokenMetadata {
+  createdAt: Date;
+  expiresAt: Date;
+  noLogout: boolean;
+}
 
-export function storeToken(token: string): void {
-  tokenSet.add(token);
-  setTimeout(() => tokenSet.delete(token), 24 * 60 * 60 * 1000);
+const tokenStore = new Map<string, TokenMetadata>();
+
+export function storeToken(token: string, noLogout = false): void {
+  tokenStore.set(token, {
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    noLogout,
+  });
 }
 
 export function validateToken(token: string): boolean {
-  return tokenSet.has(token);
+  const entry = tokenStore.get(token);
+  if (!entry) return false;
+  if (entry.expiresAt.getTime() < Date.now()) {
+    tokenStore.delete(token);
+    return false;
+  }
+  return true;
 }
 
 export function revokeToken(token: string): void {
-  tokenSet.delete(token);
+  tokenStore.delete(token);
+}
+
+export function logoutAllSessions(): void {
+  for (const [token, meta] of tokenStore.entries()) {
+    if (!meta.noLogout) {
+      tokenStore.delete(token);
+    }
+  }
+}
+
+export function updateAdminPassword(newPassword: string): void {
+  const hash = crypto.createHash("sha256").update(newPassword).digest("hex");
+  updateAdminPasswordHash(hash);
 }
 
 export function extractToken(authHeader: string | undefined): string | null {

