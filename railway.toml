@@ -1,14 +1,19 @@
 [railway]
 # Node.js project deployment
 
-[deploy]
-# Install without frozen lockfile (to avoid lockfile mismatch)
-buildCommand = "pnpm install --no-frozen-lockfile"
+[nix]
+# Use Nixpacks instead of Railpack for better control
+type = "node"
 
-# Start command for Railway
+[deploy]
+# Override build command
+buildCommand = "pnpm install --no-frozen-lockfile && pnpm run build"
+
+# Start command
 startCommand = "pnpm start"
 
-# Health check
-healthcheckPath = "/health"
-healthcheckTimeout = 10
-healthcheckPeriod = 30
+[deploy.healthcheck]
+enabled = false
+
+[nix.Node]
+version = "22"
