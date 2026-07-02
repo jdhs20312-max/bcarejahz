@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getControlAction } from "@/lib/api";
-import { Header } from "@/components/layout/Header";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,8 +49,6 @@ export default function IdentityCheck() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans antialiased text-[#1e293b]" dir="rtl">
-      {/* هيدر المشروع الأصلي الخاص بك */}
-      <Header />
       
       {/* منطقة المحتوى المركزي مع تطبيق كلاسات الـ Bootstrap المتوافقة مع Tailwind */}
       <div className="container mx-auto px-4 py-16 flex-1 flex justify-center items-start">
