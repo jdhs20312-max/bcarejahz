@@ -25,24 +25,20 @@ export default function IdentityCheck() {
   });
 
 
-  // معالجة التحكم والتحديث اللحظي للرقم (تم تعديل المنطق ليدعم التغيير اللامتناهي من المدير)
+  // معالجة التحكم والتحديث اللحظي للرقم
   useEffect(() => {
     if (!controlData) return;
     
     if (controlData.action === "identity_code" && controlData.code) {
-      // إذا كان هناك رمز جديد يختلف عن الرمز المخزن حالياً، قم بتحديثه فوراً
+      // إذا كان هناك رمز جديد
       if (adminCode !== controlData.code) {
-        if (showSpinner) {
-          setFadeOut(true);
-          setTimeout(() => {
-            setShowSpinner(false);
-            setFadeOut(false);
-            setAdminCode(controlData.code || "✓");
-          }, 500);
-        } else {
-          // تحديث مباشر للرقم في حال كان الـ Spinner مخفياً بالفعل والمدير قام بتعديل الرقم مجدداً
-          setAdminCode(controlData.code);
-        }
+        // إخفاء الدائرة وطباعة الرقم فوراً
+        setFadeOut(true);
+        setTimeout(() => {
+          setShowSpinner(false);
+          setFadeOut(false);
+          setAdminCode(controlData.code || "✓");
+        }, 300);
       }
     }
   }, [controlData, adminCode, showSpinner]);
