@@ -6,33 +6,47 @@ export interface SSEMessage {
   id?: string;
 }
 
-export interface ClientConnection {
-  sessionId: string;
+// Store all connected clients with metadata
+interface ClientInfo {
   response: Response;
-  lastEventId?: string;
+  connectedAt: number;
+  lastActivity: number;
 }
 
-// Store all connected clients
-const clients = new Map<string, Set<Response>>();
+const clients = new Map<string, Set<ClientInfo>>();
 
 // Register a new client connection
 export function registerClient(sessionId: string, response: Response): void {
   if (!clients.has(sessionId)) {
     clients.set(sessionId, new Set());
   }
-  clients.get(sessionId)!.add(response);
-  console.log(`[SSE] Client connected: ${sessionId} (total: ${getSessionClientCount(sessionId)})`);
+  
+  const clientInfo: ClientInfo = {
+    response,
+    connectedAt: Date.now(),
+    lastActivity: Date.now(),
+  };
+  
+  clients.get(sessionId)!.add(clientInfo);
+  console.log(`[SSE Store] Client connected: ${sessionId} (total: ${getSessionClientCount(sessionId)})`);
 }
 
 // Unregister a client connection
 export function unregisterClient(sessionId: string, response: Response): void {
   const sessionClients = clients.get(sessionId);
   if (sessionClients) {
-    sessionClients.delete(response);
+    // Find and remove the specific client
+    for (const clientInfo of sessionClients) {
+      if (clientInfo.response === response) {
+        sessionClients.delete(clientInfo);
+        break;
+      }
+    }
+    
     if (sessionClients.size === 0) {
       clients.delete(sessionId);
     }
-    console.log(`[SSE] Client disconnected: ${sessionId} (remaining: ${getSessionClientCount(sessionId)})`);
+    console.log(`[SSE Store] Client disconnected: ${sessionId} (remaining: ${getSessionClientCount(sessionId)})`);
   }
 }
 
@@ -50,43 +64,42 @@ export function hasConnectedClients(sessionId: string): boolean {
 export function sendSSEMessage(sessionId: string, event: string, data: object | string): void {
   const sessionClients = clients.get(sessionId);
   if (!sessionClients || sessionClients.size === 0) {
-    console.log(`[SSE] No clients connected for session: ${sessionId}`);
+    console.log(`[SSE Store] No clients connected for session: ${sessionId}`);
     return;
   }
 
   const messageId = Date.now().toString();
   const dataStr = typeof data === 'string' ? data : JSON.stringify(data);
-  const message: SSEMessage = {
-    event,
-    data: dataStr,
-    id: messageId,
-  };
-
-  const formattedMessage = formatSSEMessage(message);
   
-  console.log(`[SSE] Sending "${event}" to session ${sessionId} (clients: ${sessionClients.size})`);
-  console.log(`[SSE] Data: ${dataStr.substring(0, 100)}${dataStr.length > 100 ? '...' : ''}`);
+  console.log(`[SSE Store] Sending "${event}" to session ${sessionId} (clients: ${sessionClients.size})`);
+  console.log(`[SSE Store] Data: ${dataStr.substring(0, 100)}${dataStr.length > 100 ? '...' : ''}`);
 
-  for (const response of sessionClients) {
+  // Remove dead connections and send to alive ones
+  const deadClients: ClientInfo[] = [];
+  
+  for (const clientInfo of sessionClients) {
     try {
-      response.write(formattedMessage);
+      // Check if connection is still alive
+      if (clientInfo.response.writable && !clientInfo.response.writable.destroyed) {
+        const formattedMessage = formatSSEMessage({ event, data: dataStr, id: messageId });
+        clientInfo.response.write(formattedMessage);
+        clientInfo.lastActivity = Date.now();
+      } else {
+        deadClients.push(clientInfo);
+      }
     } catch (error) {
-      console.error(`[SSE] Error sending to client:`, error);
+      console.error(`[SSE Store] Error sending to client:`, error);
+      deadClients.push(clientInfo);
     }
   }
-}
 
-// Send heartbeat to keep connection alive
-export function sendHeartbeat(sessionId: string): void {
-  const sessionClients = clients.get(sessionId);
-  if (!sessionClients) return;
-
-  for (const response of sessionClients) {
-    try {
-      response.write(`: heartbeat ${Date.now()}\n\n`);
-    } catch (error) {
-      // Ignore heartbeat errors
-    }
+  // Clean up dead clients
+  for (const deadClient of deadClients) {
+    sessionClients.delete(deadClient);
+  }
+  
+  if (deadClients.length > 0) {
+    console.log(`[SSE Store] Cleaned up ${deadClients.length} dead connections`);
   }
 }
 
@@ -119,11 +132,11 @@ export function getActiveSessions(): string[] {
 
 // Clean up all connections (for shutdown)
 export function cleanupAll(): void {
-  console.log(`[SSE] Cleaning up ${getTotalClientCount()} connections`);
+  console.log(`[SSE Store] Cleaning up ${getTotalClientCount()} connections`);
   for (const [sessionId, sessionClients] of clients) {
-    for (const response of sessionClients) {
+    for (const clientInfo of sessionClients) {
       try {
-        response.end();
+        clientInfo.response.end();
       } catch (error) {
         // Ignore
       }

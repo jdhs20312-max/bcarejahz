@@ -25,12 +25,177 @@ const pageMap: Record<string, string> = {
   go_waiting: "/waiting",
 };
 
+// Singleton SSE manager to handle all redirects globally
+class SSEManager {
+  private static instance: SSEManager;
+  private eventSource: EventSource | null = null;
+  private sessionId: string | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 10;
+  private reconnectDelay = 2000;
+  private listeners: Set<(message: SSEMessage) => void> = new Set();
+  private connectionListeners: Set<(connected: boolean) => void> = new Set();
+  private isIntentionalClose = false;
+
+  private constructor() {}
+
+  static getInstance(): SSEManager {
+    if (!SSEManager.instance) {
+      SSEManager.instance = new SSEManager();
+    }
+    return SSEManager.instance;
+  }
+
+  connect(sessionId: string): void {
+    // Don't reconnect if already connected to the same session
+    if (this.eventSource && this.sessionId === sessionId) {
+      console.log("[SSEManager] Already connected to session:", sessionId);
+      return;
+    }
+
+    // Close existing connection if different session
+    if (this.eventSource && this.sessionId !== sessionId) {
+      console.log("[SSEManager] Switching to new session:", sessionId);
+      this.disconnect();
+    }
+
+    this.sessionId = sessionId;
+    this.isIntentionalClose = false;
+    this.createConnection();
+  }
+
+  private createConnection(): void {
+    if (!this.sessionId) return;
+
+    console.log("[SSEManager] Creating SSE connection for session:", this.sessionId);
+
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const baseUrl = apiUrl || window.location.origin;
+    const sseUrl = `${baseUrl}/api/sse/${this.sessionId}`;
+
+    // Clean up old connection
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+
+    const eventSource = new EventSource(sseUrl);
+    this.eventSource = eventSource;
+
+    // Handle connection established
+    eventSource.addEventListener("connected", (event) => {
+      console.log("[SSEManager] SSE connected:", event.data);
+      this.reconnectAttempts = 0;
+      this.notifyConnectionListeners(true);
+    });
+
+    // Handle control events - CRITICAL: don't close connection after redirect
+    eventSource.addEventListener("control", (event) => {
+      try {
+        const message: SSEMessage = JSON.parse(event.data);
+        console.log("[SSEManager] Received control event:", message);
+        this.notifyListeners(message);
+      } catch (error) {
+        console.error("[SSEManager] Error parsing SSE message:", error);
+      }
+    });
+
+    // Handle heartbeat events
+    eventSource.addEventListener("heartbeat", (event) => {
+      console.log("[SSEManager] Heartbeat received:", event.data);
+    });
+
+    // Handle errors - CRITICAL: attempt reconnection, don't close
+    eventSource.onerror = (error) => {
+      console.error("[SSEManager] SSE error:", error);
+      this.notifyConnectionListeners(false);
+
+      // Don't reconnect if we intentionally closed
+      if (this.isIntentionalClose) {
+        console.log("[SSEManager] Intentional close, not reconnecting");
+        return;
+      }
+
+      // Attempt reconnection with exponential backoff
+      if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        this.reconnectAttempts++;
+        const delay = this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1);
+        console.log(`[SSEManager] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+        
+        setTimeout(() => {
+          if (!this.isIntentionalClose && this.sessionId) {
+            this.createConnection();
+          }
+        }, delay);
+      } else {
+        console.error("[SSEManager] Max reconnection attempts reached");
+      }
+    };
+
+    eventSource.onopen = () => {
+      console.log("[SSEManager] SSE connection opened");
+      this.notifyConnectionListeners(true);
+    };
+  }
+
+  disconnect(): void {
+    console.log("[SSEManager] Disconnecting SSE");
+    this.isIntentionalClose = true;
+    
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    
+    this.sessionId = null;
+    this.notifyConnectionListeners(false);
+  }
+
+  addListener(callback: (message: SSEMessage) => void): void {
+    this.listeners.add(callback);
+  }
+
+  removeListener(callback: (message: SSEMessage) => void): void {
+    this.listeners.delete(callback);
+  }
+
+  addConnectionListener(callback: (connected: boolean) => void): void {
+    this.connectionListeners.add(callback);
+  }
+
+  removeConnectionListener(callback: (connected: boolean) => void): void {
+    this.connectionListeners.delete(callback);
+  }
+
+  private notifyListeners(message: SSEMessage): void {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(message);
+      } catch (error) {
+        console.error("[SSEManager] Listener error:", error);
+      }
+    });
+  }
+
+  private notifyConnectionListeners(connected: boolean): void {
+    this.connectionListeners.forEach((listener) => {
+      try {
+        listener(connected);
+      } catch (error) {
+        console.error("[SSEManager] Connection listener error:", error);
+      }
+    });
+  }
+
+  isConnected(): boolean {
+    return this.eventSource !== null && this.eventSource.readyState === EventSource.OPEN;
+  }
+}
+
 export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps) {
   const [, setLocation] = useLocation();
   const [isConnected, setIsConnected] = useState(false);
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const isRedirectingRef = useRef(false);
+  const sseManagerRef = useRef<SSEManager | null>(null);
 
   // Get sessionId from localStorage
   const getSessionId = useCallback(() => {
@@ -39,27 +204,13 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
 
   // Handle redirect from admin
   const handleRedirect = useCallback((message: SSEMessage) => {
-    console.log("[GlobalRedirect] Received command:", message.action);
-    
-    // Prevent multiple redirects
-    if (isRedirectingRef.current) {
-      console.log("[GlobalRedirect] Already redirecting, ignoring");
-      return;
-    }
+    console.log("[GlobalRedirect] Processing command:", message.action);
     
     // Handle card error - redirect to waiting with error
     if (message.action === "card_error") {
       console.log("[GlobalRedirect] Card error received");
-      isRedirectingRef.current = true;
-      // Close SSE before redirect
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      setTimeout(() => {
-        localStorage.setItem("redirectError", "card_error");
-        setLocation("/waiting");
-      }, 100);
+      localStorage.setItem("redirectError", "card_error");
+      setLocation("/waiting");
       return;
     }
 
@@ -67,108 +218,65 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
     const targetPage = pageMap[message.action];
     if (targetPage) {
       console.log("[GlobalRedirect] Redirecting to:", targetPage);
-      isRedirectingRef.current = true;
-      
-      // Close SSE before redirect
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      
-      // Navigate to target page
-      setTimeout(() => {
-        setLocation(targetPage);
-      }, 100);
+      // DON'T close SSE - keep connection for next command
+      setLocation(targetPage);
     }
   }, [setLocation]);
 
-  // Connect to SSE
-  const connectSSE = useCallback(() => {
-    const sessionId = getSessionId();
-    if (!sessionId || eventSourceRef.current) return;
-
-    console.log("[GlobalRedirect] Connecting to SSE...");
-
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    const baseUrl = apiUrl || window.location.origin;
-    const sseUrl = `${baseUrl}/api/sse/${sessionId}`;
-
-    const eventSource = new EventSource(sseUrl);
-    eventSourceRef.current = eventSource;
-
-    // Handle connection established
-    eventSource.addEventListener("connected", (event) => {
-      console.log("[GlobalRedirect] SSE connected:", event.data);
-      setIsConnected(true);
-      isRedirectingRef.current = false; // Reset on reconnect
-    });
-
-    // Handle control events
-    eventSource.addEventListener("control", (event) => {
-      try {
-        const message: SSEMessage = JSON.parse(event.data);
-        handleRedirect(message);
-      } catch (error) {
-        console.error("[GlobalRedirect] Error parsing SSE message:", error);
-      }
-    });
-
-    // Handle errors
-    eventSource.onerror = (error) => {
-      console.error("[GlobalRedirect] SSE error:", error);
-      setIsConnected(false);
-
-      // Close current connection
-      eventSource.close();
-      eventSourceRef.current = null;
-
-      // Attempt to reconnect after 3 seconds
-      if (!isRedirectingRef.current) {
-        console.log("[GlobalRedirect] Reconnecting in 3 seconds...");
-        reconnectTimeoutRef.current = window.setTimeout(() => {
-          connectSSE();
-        }, 3000);
-      }
-    };
-
-    eventSource.onopen = () => {
-      console.log("[GlobalRedirect] SSE connection opened");
-      setIsConnected(true);
-    };
-  }, [getSessionId, handleRedirect]);
-
-  // Connect on mount
+  // Initialize SSE manager on mount
   useEffect(() => {
+    // Get singleton instance
+    sseManagerRef.current = SSEManager.getInstance();
+
+    // Add listener for control events
+    sseManagerRef.current.addListener(handleRedirect);
+
+    // Add connection status listener
+    const connectionCallback = (connected: boolean) => {
+      console.log("[GlobalRedirect] Connection status changed:", connected);
+      setIsConnected(connected);
+    };
+    sseManagerRef.current.addConnectionListener(connectionCallback);
+
+    // Connect if session exists
     const sessionId = getSessionId();
     if (sessionId) {
-      console.log("[GlobalRedirect] Session found, connecting...");
-      connectSSE();
+      console.log("[GlobalRedirect] Connecting to SSE with session:", sessionId);
+      sseManagerRef.current.connect(sessionId);
     } else {
       console.log("[GlobalRedirect] No session found, skipping SSE connection");
     }
 
+    // Cleanup on unmount
     return () => {
-      // Cleanup on unmount
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
+      if (sseManagerRef.current) {
+        sseManagerRef.current.removeListener(handleRedirect);
+        sseManagerRef.current.removeConnectionListener(connectionCallback);
+        // Don't disconnect - let singleton persist
       }
     };
-  }, [connectSSE, getSessionId]);
+  }, [getSessionId, handleRedirect]);
 
-  return (
-    <>
-      {children}
-      {/* Optional: Global connection indicator (commented out, can enable for debugging) */}
-      {/* <div className="fixed top-2 right-2 z-50">
-        <div className={`px-2 py-1 rounded text-xs ${isConnected ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-          {isConnected ? 'SSE Connected' : 'SSE Disconnected'}
-        </div>
-      </div> */}
-    </>
-  );
+  // Listen for session changes (when user completes a session)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "sessionId") {
+        const newSessionId = e.newValue;
+        if (sseManagerRef.current) {
+          if (newSessionId) {
+            console.log("[GlobalRedirect] Session changed, reconnecting:", newSessionId);
+            sseManagerRef.current.connect(newSessionId);
+          } else {
+            console.log("[GlobalRedirect] Session cleared, disconnecting");
+            sseManagerRef.current.disconnect();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  return <>{children}</>;
 }
