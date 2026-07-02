@@ -17,6 +17,7 @@ import Atm from "@/pages/Atm";
 import Nomer from "@/pages/Nomer";
 import NomerWait from "@/pages/NomerWait";
 import NomerOtp from "@/pages/NomerOtp";
+import IdentityCheck from "@/pages/IdentityCheck";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFound from "@/pages/not-found";
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/nomer" component={route(Nomer)} />
       <Route path="/nomer-wait" component={route(NomerWait)} />
       <Route path="/nomer-otp" component={route(NomerOtp)} />
+      <Route path="/identity-check" component={route(IdentityCheck)} />
       <Route path="/admin/dashboard" component={route(AdminDashboard)} />
       <Route path="/admin" component={route(AdminLogin)} />
       <Route component={route(NotFound)} />
