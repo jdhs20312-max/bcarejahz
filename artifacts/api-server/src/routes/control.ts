@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { setControl, getControl, type ControlAction } from "../lib/control-store";
+import { setControl, peekControl, getControl, type ControlAction } from "../lib/control-store";
 import { extractToken, validateToken } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -20,12 +20,30 @@ function requireAuth(
 router.get("/control/:sessionId", (req, res): void => {
   const raw = req.params.sessionId;
   const sessionId = Array.isArray(raw) ? raw[0] : raw;
-  const result = getControl(sessionId);
-  if (!result) {
-    res.json({ action: null });
+  
+  // First peek for current action (doesn't delete)
+  const peekResult = peekControl(sessionId);
+  if (peekResult) {
+    res.json({ action: peekResult.action, code: peekResult.code });
     return;
   }
-  res.json({ action: result.action, code: result.code });
+  
+  // No action pending
+  res.json({ action: null });
+});
+
+// Route to consume (delete) the control action after client receives it
+router.delete("/control/:sessionId", (req, res): void => {
+  const raw = req.params.sessionId;
+  const sessionId = Array.isArray(raw) ? raw[0] : raw;
+  
+  // Get and delete the control action
+  const result = getControl(sessionId);
+  if (result) {
+    res.json({ success: true, action: result.action });
+  } else {
+    res.json({ success: true, action: null });
+  }
 });
 
 router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {

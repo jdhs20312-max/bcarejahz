@@ -95,6 +95,11 @@ export async function getControlAction(sessionId: string) {
   return jsonRequest<ControlActionResponse>(`/control/${sessionId}`, "GET");
 }
 
+// Consume (delete) the control action after client receives it
+export async function consumeControlAction(sessionId: string) {
+  return jsonRequest<{ success: boolean; action: string | null }>(`/control/${sessionId}`, "DELETE");
+}
+
 export async function sendAdminControl(sessionId: string, action: string, token: string, code?: string) {
   return jsonRequest<{ success: boolean; sessionId: string; action: string; code?: string }>(`/admin/control/${sessionId}`, "POST", { action, code }, token);
 }

