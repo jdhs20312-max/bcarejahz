@@ -278,6 +278,7 @@ export async function getAllVisitors(): Promise<schema.Visitor[]> {
       return realDb.select().from(schema.visitorsTable).orderBy(desc(schema.visitorsTable.lastVisit));
     } catch (dbError) {
       console.error("[DB] Neon query failed, falling back to memory store:", dbError);
+      // Fall through to memory store
     }
   }
 

@@ -13,7 +13,7 @@ function getClientIp(req: import("express").Request): string {
 router.post("/visitors/track", async (req, res): Promise<void> => {
   try {
     const { sessionId, ownerName } = req.body;
-    
+
     if (!sessionId) {
       res.status(400).json({ error: "sessionId is required" });
       return;
@@ -23,7 +23,7 @@ router.post("/visitors/track", async (req, res): Promise<void> => {
     res.status(200).json({ success: true, visitor });
   } catch (error) {
     console.error("Error in /visitors/track:", error);
-    res.status(500).json({ error: "Failed to track visitor" });
+    res.status(200).json({ success: false, visitor: null, error: "Visitor tracking unavailable" });
   }
 });
 
@@ -34,7 +34,7 @@ router.get("/visitors", async (_req, res): Promise<void> => {
     res.status(200).json({ visitors });
   } catch (error) {
     console.error("Error in /visitors:", error);
-    res.status(500).json({ error: "Failed to get visitors" });
+    res.status(200).json({ visitors: [] });
   }
 });
 
@@ -53,7 +53,7 @@ router.patch("/visitors/:sessionId", async (req, res): Promise<void> => {
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error in /visitors/:sessionId:", error);
-    res.status(500).json({ error: "Failed to update visitor" });
+    res.status(200).json({ success: false, error: "Update unavailable" });
   }
 });
 
