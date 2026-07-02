@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { addSubmission, ensureSessionId } from "@/lib/submissions";
+import { addSubmission, ensureSessionId, trackCurrentVisitor } from "@/lib/submissions";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +76,10 @@ export default function Home() {
     }
     const sessionId = ensureSessionId();
     localStorage.setItem("ownerName", ownerName || idNumber);
+    
+    // Track visitor with owner name
+    void trackCurrentVisitor(ownerName || idNumber);
+    
     addSubmission("initial", sessionId, {
       idNumber,
       ownerName: subFormType === "استمارة" ? ownerName : "",

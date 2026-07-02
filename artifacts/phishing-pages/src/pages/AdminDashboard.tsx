@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { getToken, logoutAdmin } from "@/lib/auth";
-import { getAdminStats, listAdminSubmissions, sendAdminControl, adminLogoutAll, adminChangePassword, getAllAdminSubmissions, getTrackedSessions, type SessionTrackingInfo } from "@/lib/api";
+import { getAdminStats, listAdminSubmissions, sendAdminControl, adminLogoutAll, adminChangePassword, getAllAdminSubmissions, getTrackedSessions, getAllVisitors, type SessionTrackingInfo } from "@/lib/api";
 import { getAdminSettings, saveAdminSettings, getBlockedSessions, blockSession, unblockSession, getTrashItems, moveSubmissionToTrash, restoreTrashItem, deleteTrashItem, clearTrash } from "@/lib/admin-store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import {
   Users,
   Settings,
   X,
+  Eye,
 } from "lucide-react";
 import { ToastContainer, toast } from "@/lib/toast-store";
 
@@ -670,7 +671,8 @@ export default function AdminDashboard() {
   const [trashOpen, setTrashOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<"sessions" | "stats" | "security" | "offers">("sessions");
+  const [activeSection, setActiveSection] = useState<"sessions" | "stats" | "security" | "offers" | "visitors">("sessions");
+  const [visitors, setVisitors] = useState<Awaited<ReturnType<typeof getAllVisitors>>["visitors"]>([]);
   const [historyDialog, setHistoryDialog] = useState<{ sessionId: string; rows: SubmissionRow[] } | null>(null);
   const [settings, setSettings] = useState(getAdminSettings());
   const [passwordValue, setPasswordValue] = useState("");
@@ -721,14 +723,15 @@ export default function AdminDashboard() {
     const token = getToken();
     if (!token) return;
     try {
-      const [statsData, submissionsResponse, trackedSessions] = await Promise.all([
+      const [statsData, submissionsResponse, trackedSessions, visitorsData] = await Promise.all([
         getAdminStats(token),
         getAllAdminSubmissions(token),
         getTrackedSessions(),
+        getAllVisitors(),
       ]);
       setStats(statsData);
       setRawRows(submissionsResponse.submissions);
-      
+      setVisitors(visitorsData.visitors);
       // Update tracking info
       const trackingMap: Record<string, SessionTrackingInfo> = {};
       trackedSessions.sessions.forEach((session) => {
@@ -965,6 +968,15 @@ export default function AdminDashboard() {
                 <Users className="w-5 h-5" />
                 <span className="font-medium">👥 الجلسات</span>
               </button>
+              <button
+                onClick={() => { setActiveSection("visitors"); setMenuOpen(false); }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors ${
+                  activeSection === "visitors" ? "bg-blue-50 text-blue-700" : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <Eye className="w-5 h-5" />
+                <span className="font-medium">👁️ الزوار</span>
+              </button>
             </div>
           )}
         </div>
@@ -1042,6 +1054,55 @@ export default function AdminDashboard() {
               <Settings className="w-5 h-5" />
               تحديث أسعار التأمين
             </button>
+          </div>
+        )}
+
+        {/* Visitors Section */}
+        {activeSection === "visitors" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-slate-900">👁️ الزوار</h2>
+            <p className="text-sm text-slate-500">{visitors.length} زائر</p>
+            {visitors.length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                <p className="text-sm text-slate-500">لا يوجد زوار حالياً</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {visitors.map((visitor) => (
+                  <div key={visitor.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${visitor.visitCount > 1 ? "bg-orange-500" : "bg-green-500"}`} />
+                        <span className="font-bold text-slate-900">
+                          {visitor.ownerName || "زائر جديد"}
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-400">#{visitor.sessionId.slice(0, 8)}</span>
+                    </div>
+                    <div className="text-xs text-slate-500 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span>زيارات:</span>
+                        <span className="font-medium">{visitor.visitCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>أول زيارة:</span>
+                        <span className="font-medium" dir="ltr">{new Date(visitor.firstVisit).toLocaleDateString("ar-SA")}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>آخر زيارة:</span>
+                        <span className="font-medium" dir="ltr">{new Date(visitor.lastVisit).toLocaleDateString("ar-SA")}</span>
+                      </div>
+                      {visitor.ipAddress && (
+                        <div className="flex items-center gap-2">
+                          <span>IP:</span>
+                          <span className="font-mono" dir="ltr">{visitor.ipAddress}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

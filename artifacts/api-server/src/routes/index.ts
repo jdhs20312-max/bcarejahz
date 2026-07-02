@@ -5,6 +5,7 @@ import adminRouter from "./admin";
 import controlRouter from "./control";
 import sseRouter from "./sse";
 import trackRouter from "./track";
+import visitorsRouter from "./visitors";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(adminRouter);
 router.use(controlRouter);
 router.use(sseRouter);
 router.use(trackRouter);
+router.use(visitorsRouter);
 
 export default router;

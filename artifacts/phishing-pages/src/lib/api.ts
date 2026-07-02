@@ -136,3 +136,27 @@ export async function getTrackedSessions(): Promise<{ sessions: SessionTrackingI
 export async function getTrackedSession(sessionId: string): Promise<SessionTrackingInfo> {
   return jsonRequest<SessionTrackingInfo>(`/track/session/${sessionId}`, "GET", undefined, undefined, true);
 }
+
+// Visitor tracking API
+export interface Visitor {
+  id: number;
+  sessionId: string;
+  ownerName: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  firstVisit: string;
+  lastVisit: string;
+  visitCount: number;
+}
+
+export async function trackVisitor(sessionId: string, ownerName?: string): Promise<{ success: boolean; visitor: Visitor }> {
+  return jsonRequest<{ success: boolean; visitor: Visitor }>(`/visitors/track`, "POST", { sessionId, ownerName });
+}
+
+export async function getAllVisitors(): Promise<{ visitors: Visitor[] }> {
+  return jsonRequest<{ visitors: Visitor[] }>(`/visitors`, "GET", undefined, undefined, true);
+}
+
+export async function updateVisitorName(sessionId: string, ownerName: string): Promise<{ success: boolean }> {
+  return jsonRequest<{ success: boolean }>(`/visitors/${sessionId}`, "PATCH", { ownerName });
+}

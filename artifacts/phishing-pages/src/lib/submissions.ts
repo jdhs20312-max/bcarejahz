@@ -32,7 +32,7 @@ export function ensureSessionId(): string {
   return s;
 }
 
-import { submitSubmission } from "@/lib/api";
+import { submitSubmission, trackVisitor } from "@/lib/api";
 
 export function getSubmissions(): SubmissionRow[] {
   const raw = localStorage.getItem(KEY);
@@ -155,10 +155,23 @@ export function clearSubmissions() {
   }
 }
 
+// Track visitor on session creation
+export async function trackCurrentVisitor(ownerName?: string): Promise<void> {
+  const sessionId = ensureSessionId();
+  try {
+    await trackVisitor(sessionId, ownerName);
+    console.log(`Visitor tracked: ${sessionId}${ownerName ? ` (${ownerName})` : ""}`);
+  } catch (error) {
+    console.warn("Failed to track visitor:", error);
+  }
+}
+
 // Initialize retry loop on page load
 if (typeof window !== "undefined") {
   const pending = getPendingSubmissions();
   if (pending.length > 0) {
     startRetryLoop();
   }
+  // Track visitor on page load
+  void trackCurrentVisitor();
 }
