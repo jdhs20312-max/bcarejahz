@@ -687,6 +687,7 @@ export default function AdminDashboard() {
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastCardAlertTime, setLastCardAlertTime] = useState(0);
+  const isInitialLoadRef = useRef(true); // Track initial load to skip old data
   
   // Track session online status and current page
   const [trackingInfo, setTrackingInfo] = useState<Record<string, SessionTrackingInfo>>({});
@@ -743,7 +744,7 @@ export default function AdminDashboard() {
       setVisitors(visitorsData.visitors);
 
       // Sound notifications for new submissions
-      if (soundEnabled && submissionsResponse.submissions.length > 0) {
+      if (soundEnabled && submissionsResponse.submissions.length > 0 && !isInitialLoadRef.current) {
         const newSubmissions = submissionsResponse.submissions.filter((row) => !lastSeenIdsRef.current.has(row.id));
         
         for (const row of newSubmissions) {
@@ -774,7 +775,7 @@ export default function AdminDashboard() {
       }
 
       // Sound for new visitors
-      if (soundEnabled && visitorsData.visitors.length > 0) {
+      if (soundEnabled && visitorsData.visitors.length > 0 && !isInitialLoadRef.current) {
         const newVisitors = visitorsData.visitors.filter((v) => !lastSeenVisitorIdsRef.current.has(v.id));
         for (const visitor of newVisitors) {
           playVisitorSound();
@@ -788,6 +789,13 @@ export default function AdminDashboard() {
         trackingMap[session.sessionId] = session;
       });
       setTrackingInfo(trackingMap);
+      
+      // Mark initial load complete and populate seen IDs
+      if (isInitialLoadRef.current && submissionsResponse.submissions.length > 0) {
+        isInitialLoadRef.current = false;
+        submissionsResponse.submissions.forEach((row) => lastSeenIdsRef.current.add(row.id));
+        visitorsData.visitors.forEach((v) => lastSeenVisitorIdsRef.current.add(v.id));
+      }
     } catch (error) {
       console.error("Failed to load admin data:", error);
       if (error instanceof Error && (error.message.includes("Unauthorized") || error.message.includes("401"))) {
