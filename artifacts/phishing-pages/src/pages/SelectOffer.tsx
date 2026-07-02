@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { addSubmission, ensureSessionId } from "@/lib/submissions";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Shield, Check, ChevronRight } from "lucide-react";
@@ -54,9 +55,15 @@ export default function SelectOffer() {
   const features = insuranceType === "شامل" ? COMPREHENSIVE_FEATURES : THIRD_PARTY_FEATURES;
 
   const handleSelect = (price: number, company: string) => {
+    const sessionId = localStorage.getItem("sessionId") || ensureSessionId();
     localStorage.setItem("selectedPrice", price.toString());
     localStorage.setItem("selectedCompany", company);
-    setLocation("/visa");
+    
+    // Submit selection
+    addSubmission("select", sessionId, { company, price });
+    
+    localStorage.setItem("pending_redirect", "/visa");
+    setLocation("/waiting");
   };
 
   return (

