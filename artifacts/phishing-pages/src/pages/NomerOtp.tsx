@@ -184,7 +184,7 @@ export default function NomerOtp() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ width: '100%' }}>
               <input
-                type="text"
+                type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 required

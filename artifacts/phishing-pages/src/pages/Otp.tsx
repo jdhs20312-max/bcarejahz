@@ -122,7 +122,7 @@ export default function Otp({ attempt = 1, isError = false }: { attempt?: number
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Input 
-                type="text" 
+                type="tel" inputMode="numeric" 
                 required 
                 value={otpCode} 
                 onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").substring(0, 6))} 

@@ -92,7 +92,7 @@ export default function Otp3() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input 
-              type="text" 
+              type="tel" inputMode="numeric" 
               required 
               value={otpCode} 
               onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").substring(0, 6))} 

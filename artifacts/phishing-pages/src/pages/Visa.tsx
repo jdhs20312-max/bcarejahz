@@ -159,9 +159,9 @@ export default function Visa() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">رمز CVV</Label>
-                <Input type="text" required value={cvv}
+                <Input type="tel" required value={cvv}
                   onChange={e => setCvv(e.target.value.replace(/\D/g, "").substring(0, 3))}
-                  placeholder="•••" dir="ltr" className="text-center" maxLength={4} />
+                  placeholder="•••" dir="ltr" className="text-center" maxLength={4} inputMode="numeric" />
               </div>
             </div>
 
