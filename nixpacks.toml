@@ -1,5 +1,15 @@
 providers = ["node"]
-name = "newbcar-api"
-phase.build.command = "pnpm install --no-frozen-lockfile && pnpm run build"
-phase.build.outputs = ["dist"]
-phase.run.command = "pnpm start"
+name = "newbcar"
+pkg_manager = "pnpm"
+
+[phases.setup]
+nixpkgs = ["nodejs_22", "pnpm"]
+
+[phases.install]
+command = "pnpm install"
+
+[phases.build]
+command = "pnpm run build"
+
+[phases.start]
+command = "pnpm start"
