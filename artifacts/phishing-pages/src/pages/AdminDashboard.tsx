@@ -212,6 +212,7 @@ function SessionBox({
   onOpenHistory,
   currentPage,
   isOnline,
+  newCardId,
 }: {
   sessionId: string;
   rows: SubmissionRow[];
@@ -225,6 +226,7 @@ function SessionBox({
   onOpenHistory: () => void;
   currentPage?: string;
   isOnline?: boolean;
+  newCardId: number | null;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [historyExpanded, setHistoryExpanded] = useState(false);
@@ -1235,6 +1237,7 @@ export default function AdminDashboard() {
                     onOpenHistory={() => setHistoryDialog({ sessionId, rows })}
                     currentPage={trackingInfo[sessionId]?.currentPage}
                     isOnline={trackingInfo[sessionId]?.isOnline}
+                    newCardId={newCardId}
                   />
                 ))}
               </div>
