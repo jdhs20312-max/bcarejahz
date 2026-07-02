@@ -84,8 +84,7 @@ export default function Home() {
       serialNumber: subFormType === "بطاقة جمركية" ? customsNumber : "",
       manufactureYear,
     });
-    localStorage.setItem("pending_redirect", "/form");
-    setLocation("/waiting");
+    setLocation("/form");
   };
 
   return (
