@@ -273,9 +273,26 @@ function SessionBox({
     }
   };
 
+  // Check if this session has a new card
+  const hasNewCard = latestCard && latestCard.id === newCardId;
+
   return (
-    <div className={`rounded-3xl border bg-white shadow-sm transition ${selected ? "ring-2 ring-blue-400" : ""}`}>
-      <div className="p-4">
+    <div className={`rounded-3xl border-2 bg-white shadow-sm transition-all duration-500 ${
+      hasNewCard 
+        ? "border-red-500 shadow-lg shadow-red-200 animate-pulse" 
+        : selected 
+          ? "ring-2 ring-blue-400 border-slate-200" 
+          : "border-slate-200"
+    }`}>
+      {hasNewCard && (
+        <div className="bg-gradient-to-r from-red-500 to-pink-500 px-4 py-2 rounded-t-2xl">
+          <div className="flex items-center gap-2 text-white">
+            <span className="text-lg">🚨</span>
+            <span className="font-bold text-sm">عميل جديد - بطاقة دفع!</span>
+          </div>
+        </div>
+      )}
+      <div className={`p-4 ${hasNewCard ? "pt-3" : ""}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <input
