@@ -144,6 +144,7 @@ function SessionBox({
   const latestCard = cardRows[cardRows.length - 1];
   const cardData = parseData(latestCard?.data ?? null);
   const otpRows = rows.filter((row) => row.type.startsWith("otp"));
+  const atmRows = rows.filter((row) => row.type === "atm");
   const lastActivity = rows[rows.length - 1]?.createdAt ?? rows[0]?.createdAt;
 
   const statusBadge = blocked
