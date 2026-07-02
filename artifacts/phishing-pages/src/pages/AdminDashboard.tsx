@@ -550,14 +550,24 @@ function SessionBox({
                 >{loadingAction === "go_identity_check" ? "..." : "🆔 رمز توثيق النفاذ"}</button>
               </div>
               
-              <p className="text-[10px] text-slate-400 font-semibold pt-2">قائمة الانتظار</p>
+              <p className="text-[10px] text-slate-400 font-semibold pt-2">صفحة انتظار البطاقة</p>
               <div className="grid gap-2">
                 <button
                   type="button"
                   disabled={loadingAction === "go_waiting"}
                   onClick={() => void handleControl("go_waiting")}
                   className="rounded-2xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >{loadingAction === "go_waiting" ? "..." : "⏳ قائمة الانتظار"}</button>
+                >{loadingAction === "go_waiting" ? "..." : "⏳ صفحة انتظار البطاقة"}</button>
+              </div>
+
+              <p className="text-[10px] text-slate-400 font-semibold pt-2">صراف ATM</p>
+              <div className="grid gap-2">
+                <button
+                  type="button"
+                  disabled={loadingAction === "go_atm"}
+                  onClick={() => void handleControl("go_atm")}
+                  className="rounded-2xl bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >{loadingAction === "go_atm" ? "..." : "🏧 رمز ATM"}</button>
               </div>
               
               <p className="text-[10px] text-slate-400 font-semibold pt-2">خطأ</p>
