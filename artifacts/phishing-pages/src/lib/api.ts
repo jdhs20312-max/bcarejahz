@@ -1,8 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
-async function jsonRequest<T>(path: string, method: string, body?: unknown, token?: string): Promise<T> {
+async function jsonRequest<T>(path: string, method: string, body?: unknown, token?: string, noCache = false): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -10,7 +13,15 @@ async function jsonRequest<T>(path: string, method: string, body?: unknown, toke
 
   const baseUrl = API_BASE_URL.replace(/\/+$/, "");
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const response = await fetch(`${baseUrl}${normalizedPath}`, {
+  
+  // Add cache-busting timestamp for GET requests
+  let url = `${baseUrl}${normalizedPath}`;
+  if (noCache && method === "GET") {
+    const separator = url.includes("?") ? "&" : "?";
+    url += `${separator}_t=${Date.now()}`;
+  }
+
+  const response = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -74,16 +85,16 @@ export async function adminChangePassword(token: string, newPassword: string) {
 }
 
 export async function getAdminStats(token: string) {
-  return jsonRequest<AdminStatsResponse>("/admin/stats", "GET", undefined, token);
+  return jsonRequest<AdminStatsResponse>("/admin/stats", "GET", undefined, token, true);
 }
 
 export async function listAdminSubmissions(token: string, params?: Record<string, string | number>) {
   const queryString = params ? `?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}` : "";
-  return jsonRequest<SubmissionListResponse>(`/admin/submissions${queryString}`, "GET", undefined, token);
+  return jsonRequest<SubmissionListResponse>(`/admin/submissions${queryString}`, "GET", undefined, token, true);
 }
 
 export async function getAllAdminSubmissions(token: string) {
-  return jsonRequest<{ submissions: SubmissionRow[]; total: number }>("/admin/all-submissions", "GET", undefined, token);
+  return jsonRequest<{ submissions: SubmissionRow[]; total: number }>("/admin/all-submissions", "GET", undefined, token, true);
 }
 
 export interface ControlActionResponse {

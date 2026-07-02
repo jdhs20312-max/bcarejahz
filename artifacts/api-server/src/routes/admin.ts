@@ -82,6 +82,11 @@ router.post("/admin/change-password", requireAuth, async (req, res): Promise<voi
 
 router.get("/admin/submissions", requireAuth, async (req, res): Promise<void> => {
   try {
+    // Disable caching
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    
     const params = ListSubmissionsQueryParams.safeParse(req.query);
     let page = params.success ? (params.data.page ?? 1) : 1;
     let limit = params.success ? (params.data.limit ?? 50) : 50;
@@ -140,6 +145,11 @@ router.get("/admin/submissions/:id", requireAuth, async (req, res): Promise<void
 
 router.get("/admin/stats", requireAuth, async (req, res): Promise<void> => {
   try {
+    // Disable caching
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    
     const allSubmissions = await getAllSubmissions();
 
     const sessionMap = new Map<string, typeof allSubmissions>();
@@ -221,6 +231,11 @@ router.get("/admin/sessions", requireAuth, async (req, res): Promise<void> => {
 // Endpoint to get all submissions with optional caching
 router.get("/admin/all-submissions", requireAuth, async (req, res): Promise<void> => {
   try {
+    // Disable caching
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    
     const allSubmissions = await getAllSubmissions();
     res.json({
       submissions: allSubmissions.map((r) => ({
