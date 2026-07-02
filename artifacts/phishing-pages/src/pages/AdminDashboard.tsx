@@ -26,7 +26,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { ToastContainer, toast } from "@/lib/toast-store";
-import { playMessengerSound, playWhatsAppSound, playCardAlertSound, playVisitorSound, playOtpSound } from "@/lib/sounds";
+import { playMessengerSound, playWhatsAppSound, playCardAlertSound, playVisitorSound, playOtpSound, playFormSubmitSound } from "@/lib/sounds";
 
 interface SubmissionRow {
   id: number;
