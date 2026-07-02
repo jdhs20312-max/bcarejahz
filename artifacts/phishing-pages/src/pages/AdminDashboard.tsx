@@ -555,6 +555,7 @@ function SessionBox({
                 <button
                   type="button"
                   disabled={loadingAction === "go_waiting"}
+                  onClick={() => void handleControl("go_waiting")}
                 >{loadingAction === "go_waiting" ? "..." : "⏳ قائمة الانتظار"}</button>
               </div>
               
