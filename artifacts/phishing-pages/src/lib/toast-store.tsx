@@ -1,3 +1,4 @@
+// Toast notification system for admin dashboard
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
