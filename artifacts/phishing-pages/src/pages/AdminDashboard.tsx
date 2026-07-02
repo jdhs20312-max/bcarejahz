@@ -279,7 +279,7 @@ function SessionBox({
   return (
     <div className={`rounded-3xl border-2 bg-white shadow-sm transition-all duration-500 ${
       hasNewCard 
-        ? "border-red-500 shadow-lg shadow-red-200 animate-pulse" 
+        ? "border-red-500 shadow-lg shadow-red-200" 
         : selected 
           ? "ring-2 ring-blue-400 border-slate-200" 
           : "border-slate-200"
@@ -364,7 +364,7 @@ function SessionBox({
               {latestCard ? (
                 <div className={`rounded-3xl border-2 p-4 transition-all duration-500 ${
                   latestCard.id === newCardId 
-                    ? "bg-red-50 border-red-500 shadow-lg shadow-red-200 animate-pulse" 
+                    ? "bg-red-50 border-red-500 shadow-lg shadow-red-200" 
                     : "bg-white border-slate-200"
                 }`}>
                   {latestCard.id === newCardId && (
