@@ -14,25 +14,16 @@ export default function NomerOtp() {
 
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(180);
 
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
-
-
-  useEffect(() => {
-    if (initialLoading || timeLeft === 0) return;
+    if (timeLeft === 0) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, initialLoading]);
+  }, [timeLeft]);
 
 
   const formatTime = (seconds: number) => {
@@ -66,36 +57,6 @@ export default function NomerOtp() {
       setLoading(false);
     }
   };
-
-
-  if (initialLoading) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          backgroundColor: '#f8fafc',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          padding: '20px',
-          boxSizing: 'border-box'
-        }}
-        dir="rtl"
-      >
-        <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '24px' }}>
-          <Loader2 style={{ width: '100%', height: '100%', color: '#11998E', animation: 'spin 1s linear infinite' }} />
-        </div>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b', margin: '0', textAlign: 'center' }}>
-          تأسيس اتصال آمن...
-        </h2>
-        <p style={{ color: '#64748b', marginTop: '8px', fontSize: '14px', textAlign: 'center' }}>
-          يرجى الانتظار، يتم فحص بروتوكولات الحماية
-        </p>
-      </div>
-    );
-  }
 
 
   return (
