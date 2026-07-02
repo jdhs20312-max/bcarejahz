@@ -217,9 +217,15 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
   const [isConnected, setIsConnected] = useState(false);
   const sseManagerRef = useRef<SSEManager | null>(null);
 
-  // Get sessionId from localStorage
+  // Get sessionId from localStorage, create if doesn't exist
   const getSessionId = useCallback(() => {
-    return localStorage.getItem("sessionId");
+    let sessionId = localStorage.getItem("sessionId");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("sessionId", sessionId);
+      console.log("[GlobalRedirect] Created new sessionId:", sessionId);
+    }
+    return sessionId;
   }, []);
 
   // Handle redirect from admin
