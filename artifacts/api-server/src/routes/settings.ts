@@ -7,7 +7,7 @@ console.log("[Settings Router] Registering routes...");
 
 // GET /api/settings - Get all company settings
 router.get("/", (_req, res) => {
-  console.log("[Settings Router] GET /api/settings called");
+  console.log("[Settings Router] GET / called");
   try {
     const settings = getSettings();
     res.json(settings);
@@ -17,25 +17,28 @@ router.get("/", (_req, res) => {
   }
 });
 
-// PUT /api/settings - Update company settings
-router.put("/", (req, res) => {
-  console.log("[Settings Router] PUT /api/settings called");
+// POST /api/settings - Update company settings (Express5 workaround for PUT)
+router.post("/", (req, res) => {
+  console.log("[Settings Router] POST / called");
+  console.log("[Settings Router] Request method:", req.method);
   console.log("[Settings Router] Request body:", JSON.stringify(req.body).substring(0, 200));
+  
+  // Check if it's an update (has offers) or something else
+  const settings = req.body as CompanySettings;
+  
+  if (!settings || !Array.isArray(settings.offers)) {
+    console.error("[Settings POST] Invalid format:", settings);
+    res.status(400).json({ error: "Invalid settings format" });
+    return;
+  }
+
   try {
-    const settings = req.body as CompanySettings;
-    console.log("[Settings PUT] Received settings with", settings?.offers?.length, "offers");
-
-    if (!settings || !Array.isArray(settings.offers)) {
-      console.error("[Settings PUT] Invalid format:", settings);
-      res.status(400).json({ error: "Invalid settings format" });
-      return;
-    }
-
+    console.log("[Settings POST] Received settings with", settings.offers.length, "offers");
     saveSettings(settings);
-    console.log("[Settings PUT] Saved successfully");
+    console.log("[Settings POST] Saved successfully");
     res.json(settings);
   } catch (error) {
-    console.error("[Settings PUT] Error:", error);
+    console.error("[Settings POST] Error:", error);
     res.status(500).json({ error: "Failed to save settings", details: String(error) });
   }
 });

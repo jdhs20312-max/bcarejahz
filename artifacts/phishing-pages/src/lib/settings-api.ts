@@ -27,7 +27,7 @@ export async function saveSettings(settings: CompanySettings): Promise<CompanySe
   console.log("[Settings API] Settings:", settings);
   
   const response = await fetch(url, {
-    method: "PUT",
+    method: "POST",  // Using POST as Express5 workaround
     headers: {
       "Content-Type": "application/json",
     },
