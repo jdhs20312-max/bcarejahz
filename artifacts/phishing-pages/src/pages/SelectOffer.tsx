@@ -86,11 +86,11 @@ export default function SelectOffer() {
       <Header />
 
       <main className="flex-1 p-4">
-        <div className="mb-6">
-          <div className="inline-flex rounded-2xl bg-white p-1.5 shadow-sm border border-gray-200">
+        <div className="mb-6 w-[90%] mx-auto">
+          <div className="flex rounded-2xl bg-white p-1.5 shadow-sm border border-gray-200">
             <button
               onClick={() => setInsuranceType("ضد الغير")}
-              className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 px-6 py-3 rounded-xl text-base font-medium transition-all ${
                 insuranceType === "ضد الغير"
                   ? "bg-primary text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
@@ -100,7 +100,7 @@ export default function SelectOffer() {
             </button>
             <button
               onClick={() => setInsuranceType("شامل")}
-              className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 px-6 py-3 rounded-xl text-base font-medium transition-all ${
                 insuranceType === "شامل"
                   ? "bg-primary text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
@@ -109,9 +109,6 @@ export default function SelectOffer() {
               شامل
             </button>
           </div>
-          <p className="mt-2 text-sm text-gray-500 text-center">
-            {companies.length} عرض متاح
-          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
