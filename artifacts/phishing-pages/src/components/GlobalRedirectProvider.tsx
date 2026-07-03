@@ -224,7 +224,12 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
     if (!sessionId) {
       sessionId = crypto.randomUUID();
       localStorage.setItem("sessionId", sessionId);
+      // Set cookie for server-side auth middleware
+      document.cookie = `sessionId=${sessionId}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
       console.log("[GlobalRedirect] Created new sessionId:", sessionId);
+    } else {
+      // Ensure cookie is synced with localStorage
+      document.cookie = `sessionId=${sessionId}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
     }
     return sessionId;
   }, []);
