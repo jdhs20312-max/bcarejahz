@@ -17,7 +17,7 @@ export function Header() {
         <Link href="/">
           <div className="cursor-pointer flex items-center">
             <img
-              src="/Bcare-logo.svg"
+              src="https://bcare.com.sa/assets/images/Bcare-logo.svg"
               alt="Bcare Logo"
               className="h-10 md:h-12 w-auto"
             />
