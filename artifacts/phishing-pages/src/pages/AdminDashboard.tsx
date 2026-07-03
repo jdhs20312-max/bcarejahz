@@ -221,7 +221,7 @@ function SessionBox({
   blocked?: string;
   selected: boolean;
   onToggleSelect: () => void;
-  onControl: (sessionId: string, action: string, code?: string) => Promise<void>;
+  onControl: (sessionId: string, action: string, code?: string, authorize?: boolean) => Promise<void>;
   onBlock: () => void;
   onUnblock: () => void;
   onDelete: () => void;
