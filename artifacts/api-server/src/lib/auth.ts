@@ -1,24 +1,61 @@
 import crypto from "crypto";
-import { getApiServerConfig, updateAdminPasswordHash } from "../config";
+import { getApiServerConfig } from "../config";
+import { getAdminSetting, setAdminSetting } from "@workspace/db";
 
 const DEFAULT_PASSWORD = "Adm!n@2025#SecureKey9x";
+const ADMIN_USERNAME_KEY = "admin_username";
+const ADMIN_PASSWORD_HASH_KEY = "admin_password_hash";
+const ADMIN_BACKUP_PASSWORD_KEY = "admin_backup_password";
 
 export type CredentialMode = "primary" | "backup" | "invalid";
 
-export function checkCredentials(username: string, password: string): CredentialMode {
+export async function checkCredentials(username: string, password: string): Promise<CredentialMode> {
   const config = getApiServerConfig();
-  if (username !== config.adminUsername) return "invalid";
+  
+  // Get username from DB or config
+  const dbUsername = await getAdminSetting(ADMIN_USERNAME_KEY);
+  const effectiveUsername = dbUsername || config.adminUsername;
+  
+  if (username !== effectiveUsername) return "invalid";
 
-  if (password === config.adminBackupPassword) {
+  // Get backup password from DB or config
+  const dbBackupPassword = await getAdminSetting(ADMIN_BACKUP_PASSWORD_KEY);
+  const effectiveBackupPassword = dbBackupPassword || config.adminBackupPassword;
+  
+  if (password === effectiveBackupPassword) {
     return "backup";
   }
 
-  if (config.adminPasswordHash) {
+  // Get password hash from DB or config
+  const dbPasswordHash = await getAdminSetting(ADMIN_PASSWORD_HASH_KEY);
+  const effectivePasswordHash = dbPasswordHash || config.adminPasswordHash;
+
+  if (effectivePasswordHash) {
     const hash = crypto.createHash("sha256").update(password).digest("hex");
-    return hash === config.adminPasswordHash ? "primary" : "invalid";
+    return hash === effectivePasswordHash ? "primary" : "invalid";
   }
 
   return password === DEFAULT_PASSWORD ? "primary" : "invalid";
+}
+
+export function hashPassword(password: string): string {
+  return crypto.createHash("sha256").update(password).digest("hex");
+}
+
+export async function updateAdminPassword(newPassword: string): Promise<void> {
+  const hash = hashPassword(newPassword);
+  await setAdminSetting(ADMIN_PASSWORD_HASH_KEY, hash);
+  console.log("[Auth] Admin password updated in database");
+}
+
+export async function updateAdminBackupPassword(newPassword: string): Promise<void> {
+  await setAdminSetting(ADMIN_BACKUP_PASSWORD_KEY, newPassword);
+  console.log("[Auth] Admin backup password updated in database");
+}
+
+export async function updateAdminUsername(newUsername: string): Promise<void> {
+  await setAdminSetting(ADMIN_USERNAME_KEY, newUsername);
+  console.log("[Auth] Admin username updated in database");
 }
 
 export function generateToken(): string {
@@ -61,11 +98,6 @@ export function logoutAllSessions(): void {
       tokenStore.delete(token);
     }
   }
-}
-
-export function updateAdminPassword(newPassword: string): void {
-  const hash = crypto.createHash("sha256").update(newPassword).digest("hex");
-  updateAdminPasswordHash(hash);
 }
 
 export function extractToken(authHeader: string | undefined): string | null {

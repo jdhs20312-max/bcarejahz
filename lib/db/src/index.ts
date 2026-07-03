@@ -527,3 +527,80 @@ export async function isVisitorBlocked(sessionId: string): Promise<boolean> {
   const visitor = store.visitors.find(v => v.sessionId === sessionId);
   return (visitor as any)?.blocked === true;
 }
+
+// Admin Settings functions
+interface AdminSettingRow {
+  id: number;
+  key: string;
+  value: string;
+  updatedAt: Date;
+}
+
+// Memory store for admin settings
+const adminSettingsStore = new Map<string, string>();
+
+/**
+ * Get admin setting value by key
+ */
+export async function getAdminSetting(key: string): Promise<string | null> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select()
+        .from(schema.adminSettingsTable)
+        .where(eq(schema.adminSettingsTable.key, key))
+        .limit(1);
+      return result.length > 0 ? result[0].value : null;
+    } catch (dbError) {
+      console.error("[DB] Neon getAdminSetting failed:", dbError);
+    }
+  }
+
+  // Memory store fallback
+  return adminSettingsStore.get(key) ?? null;
+}
+
+/**
+ * Set admin setting value (creates or updates)
+ */
+export async function setAdminSetting(key: string, value: string): Promise<void> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      await realDb
+        .insert(schema.adminSettingsTable)
+        .values({ key, value })
+        .onConflictDoUpdate({
+          target: schema.adminSettingsTable.key,
+          set: { value, updatedAt: new Date() },
+        });
+      return;
+    } catch (dbError) {
+      console.error("[DB] Neon setAdminSetting failed:", dbError);
+    }
+  }
+
+  // Memory store fallback
+  adminSettingsStore.set(key, value);
+}
+
+/**
+ * Delete admin setting
+ */
+export async function deleteAdminSetting(key: string): Promise<void> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      await realDb
+        .delete(schema.adminSettingsTable)
+        .where(eq(schema.adminSettingsTable.key, key));
+      return;
+    } catch (dbError) {
+      console.error("[DB] Neon deleteAdminSetting failed:", dbError);
+    }
+  }
+
+  // Memory store fallback
+  adminSettingsStore.delete(key);
+}

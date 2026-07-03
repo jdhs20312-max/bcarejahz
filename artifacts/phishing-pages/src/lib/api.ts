@@ -93,6 +93,10 @@ export async function adminChangePassword(token: string, newPassword: string) {
   return jsonRequest<{ success: boolean }>("/admin/change-password", "POST", { newPassword }, token);
 }
 
+export async function adminChangeBackupPassword(token: string, newBackupPassword: string) {
+  return jsonRequest<{ success: boolean }>("/admin/change-backup-password", "POST", { newBackupPassword }, token);
+}
+
 export async function getAdminStats(token: string) {
   return jsonRequest<AdminStatsResponse>("/admin/stats", "GET", undefined, token, true);
 }

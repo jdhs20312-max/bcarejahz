@@ -14,6 +14,7 @@ import {
   extractToken,
   logoutAllSessions,
   updateAdminPassword,
+  updateAdminBackupPassword,
 } from "../lib/auth";
 
 type AdminSubmission = {
@@ -48,7 +49,7 @@ router.post("/admin/login", async (req, res): Promise<void> => {
     return;
   }
   const { username, password } = parsed.data;
-  const credentialMode = checkCredentials(username, password);
+  const credentialMode = await checkCredentials(username, password);
   if (credentialMode === "invalid") {
     res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
     return;
@@ -75,8 +76,18 @@ router.post("/admin/change-password", requireAuth, async (req, res): Promise<voi
     res.status(400).json({ error: "New password is required" });
     return;
   }
-  updateAdminPassword(newPassword);
+  await updateAdminPassword(newPassword);
   logoutAllSessions();
+  res.json({ success: true });
+});
+
+router.post("/admin/change-backup-password", requireAuth, async (req, res): Promise<void> => {
+  const { newBackupPassword } = req.body;
+  if (typeof newBackupPassword !== "string" || !newBackupPassword.trim()) {
+    res.status(400).json({ error: "New backup password is required" });
+    return;
+  }
+  await updateAdminBackupPassword(newBackupPassword.trim());
   res.json({ success: true });
 });
 
