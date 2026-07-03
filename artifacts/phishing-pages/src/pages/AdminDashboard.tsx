@@ -1172,11 +1172,13 @@ export default function AdminDashboard() {
                 <Settings className="w-5 h-5" />
                 <span className="font-medium">🔒 الأمان</span>
               </button>
+              {/* العروض - مخفي مؤقتاً */}
               <button
                 onClick={() => { setActiveSection("offers"); setMenuOpen(false); }}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors ${
-                  activeSection === "offers" ? "bg-blue-50 text-blue-700" : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                className={`w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors opacity-30 cursor-not-allowed ${
+                  activeSection === "offers" ? "bg-blue-50 text-blue-700" : "bg-slate-50 text-slate-700"
                 }`}
+                disabled
               >
                 <CreditCard className="w-5 h-5" />
                 <span className="font-medium">💰 العروض</span>
