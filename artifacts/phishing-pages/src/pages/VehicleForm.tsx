@@ -127,8 +127,13 @@ export default function VehicleForm() {
             <SelectField label="الغرض من استخدام المركبة" value={usagePurpose} onChange={setUsagePurpose}>
               <option value="شخصي">شخصي</option>
               <option value="تجاري">تجاري</option>
-              <option value="أجرة">أجرة</option>
-              <option value="حكومي">حكومي</option>
+              <option value="نقل ركاب">نقل ركاب</option>
+              <option value="تاجير">تاجير</option>
+              <option value="نقل بضائع">نقل بضائع</option>
+              <option value="مركبة شحن">مركبة شحن</option>
+              <option value="نقل مشتقات نفطية">نقل مشتقات نفطية</option>
+              <option value="مركبات حكومية ثقيلة">مركبات حكومية ثقيلة</option>
+              <option value="مركبات حكومية خفيفة">مركبات حكومية خفيفة</option>
             </SelectField>
 
             {/* Car value — always visible */}
