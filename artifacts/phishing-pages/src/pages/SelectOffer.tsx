@@ -15,7 +15,6 @@ const DEFAULT_COMPANY_LOGOS: Record<string, string> = {
   salama: "https://manhom.majarracdn.cloud/mgmt/images/2169/1730137176/%D8%A7%D9%84%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%A5%D8%B3%D9%84%D8%A7%D9%85%D9%8A%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%B3%D9%84%D8%A7.webp",
   takaful: "https://manhom.majarracdn.cloud/mgmt/images/6738/1730127273/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%B1%D8%A7%D8%AC%D8%AD%D9%8A-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A-%D8%AA%D9%83%D8%A7%D9%81.webp",
   tawuniya: "https://manhom.majarracdn.cloud/mgmt/images/4716/1730115516/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86.webp",
-  alrajhi: "",
 };
 
 const THIRD_PARTY_FEATURES = [
@@ -41,7 +40,6 @@ const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
     { id: "salama", name: "سلامة", price: 620.5, type: "ضد الغير", active: true },
     { id: "tawuniya", name: "التعاونية", price: 685.5, type: "ضد الغير", active: true },
     { id: "takaful", name: "تكافل الراجحي", price: 695.5, type: "ضد الغير", active: true },
-    { id: "alrajhi", name: "الراجحي تكافل", price: 710.0, type: "ضد الغير", active: true },
     { id: "medgulf_2", name: "ميدغلف", price: 1350.0, type: "شامل", active: true },
     { id: "malath_2", name: "ملاذ", price: 1388.13, type: "شامل", active: true },
     { id: "walaa_2", name: "ولاء", price: 1325.0, type: "شامل", active: true },
@@ -49,7 +47,6 @@ const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
     { id: "salama_2", name: "سلامة", price: 1551.25, type: "شامل", active: true },
     { id: "buruj_2", name: "بروج", price: 1475.0, type: "شامل", active: true },
     { id: "tawuniya_2", name: "التعاونية", price: 1713.75, type: "شامل", active: true },
-    { id: "alrajhi_2", name: "الراجحي تكافل", price: 1775.0, type: "شامل", active: true },
     { id: "takaful_2", name: "تكافل الراجحي", price: 1738.75, type: "شامل", active: true },
   ],
 };
