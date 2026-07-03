@@ -100,7 +100,8 @@ router.post("/visitors/:sessionId/block", requireAuth, async (req, res): Promise
     
     // Send SSE event to redirect client to ban page
     if (success) {
-      sendSSEMessage(sessionId, "blocked", { redirect: "/ban" });
+      // Send as "control" event with action "blocked" so client can listen
+      sendSSEMessage(sessionId, "control", { action: "blocked", redirect: "/ban" });
       console.log(`[Block] Sent block event to visitor ${sessionId.substring(0, 8)}...`);
     }
     
