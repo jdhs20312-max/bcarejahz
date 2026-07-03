@@ -14,7 +14,7 @@ const DEFAULT_COMPANY_LOGOS: Record<string, string> = {
   axa: "https://amanleek.com/wp-content/uploads/2020/05/AXA-insurance-logo-300-x300.png",
   salama: "https://manhom.majarracdn.cloud/mgmt/images/2169/1730137176/%D8%A7%D9%84%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%A5%D8%B3%D9%84%D8%A7%D9%85%D9%8A%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%B3%D9%84%D8%A7.webp",
   takaful: "https://manhom.majarracdn.cloud/mgmt/images/6738/1730127273/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%B1%D8%A7%D8%AC%D8%AD%D9%8A-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A-%D8%AA%D9%83%D8%A7%D9%81.webp",
-  tawuniya: "",
+  tawuniya: "https://manhom.majarracdn.cloud/mgmt/images/4716/1730115516/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86.webp",
   alrajhi: "",
 };
 
