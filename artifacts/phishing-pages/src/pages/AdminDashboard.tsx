@@ -1016,7 +1016,7 @@ export default function AdminDashboard() {
   const allSelected = sessionCount > 0 && selectedIds.length === sessionCount;
   
   // عدد العملاء المتصلين حالياً (isOnline: true)
-  const onlineCount = trackedSessions?.sessions.filter((s) => s.isOnline).length ?? 0;
+  const onlineCount = Object.values(trackingInfo).filter((s) => s.isOnline).length;
 
   return (
     <div className="min-h-screen bg-slate-100" dir="rtl">
