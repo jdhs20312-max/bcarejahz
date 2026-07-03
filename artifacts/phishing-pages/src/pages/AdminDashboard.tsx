@@ -1268,14 +1268,67 @@ export default function AdminDashboard() {
         {/* Offers Section */}
         {activeSection === "offers" && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">💰 العروض</h2>
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="w-full flex items-center justify-center gap-3 rounded-xl bg-blue-500 text-white py-4 text-sm font-medium active:bg-blue-600"
-            >
-              <Settings className="w-5 h-5" />
-              تحديث أسعار التأمين
-            </button>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">💰 إدارة العروض والتأمين</h2>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="flex items-center gap-2 rounded-xl bg-blue-500 text-white px-4 py-2 text-sm font-medium active:bg-blue-600"
+              >
+                <Settings className="w-4 h-4" />
+                تعديل
+              </button>
+            </div>
+            
+            {/* عرض ملخص العروض */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
+                <h3 className="font-bold text-green-800 mb-2">🛡️ ضد الغير</h3>
+                <p className="text-2xl font-bold text-green-600">{settings.offers.filter(o => o.type === "ضد الغير" && o.active).length}</p>
+                <p className="text-xs text-green-600">شركة نشطة</p>
+              </div>
+              <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                <h3 className="font-bold text-blue-800 mb-2">🛡️ شامل</h3>
+                <p className="text-2xl font-bold text-blue-600">{settings.offers.filter(o => o.type === "شامل" && o.active).length}</p>
+                <p className="text-xs text-blue-600">شركة نشطة</p>
+              </div>
+            </div>
+            
+            {/* قائمة سريعة بالعروض */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-slate-700">📋 العروض الحالية</h3>
+              <div className="rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100">
+                {/* ضد الغير */}
+                <div className="p-3 bg-slate-50">
+                  <h4 className="text-sm font-semibold text-slate-600 mb-2">ضد الغير</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {settings.offers.filter(o => o.type === "ضد الغير").slice(0, 6).map((offer) => (
+                      <div key={offer.id} className="flex items-center justify-between bg-white rounded-xl p-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${offer.active ? "bg-green-500" : "bg-slate-300"}`} />
+                          <span className="text-sm font-medium">{offer.name}</span>
+                        </div>
+                        <span className="text-sm font-bold text-slate-700">{offer.price.toLocaleString()} ر.س</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* شامل */}
+                <div className="p-3">
+                  <h4 className="text-sm font-semibold text-slate-600 mb-2">شامل</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {settings.offers.filter(o => o.type === "شامل").slice(0, 6).map((offer) => (
+                      <div key={offer.id} className="flex items-center justify-between rounded-xl p-2 px-3 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${offer.active ? "bg-blue-500" : "bg-slate-300"}`} />
+                          <span className="text-sm font-medium">{offer.name}</span>
+                        </div>
+                        <span className="text-sm font-bold text-slate-700">{offer.price.toLocaleString()} ر.س</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1412,64 +1465,117 @@ export default function AdminDashboard() {
       />
 
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="sm:max-w-[720px] max-h-[85vh] flex flex-col" dir="rtl">
+        <DialogContent className="sm:max-w-[800px] max-h-[85vh] flex flex-col" dir="rtl">
           <DialogHeader>
-            <DialogTitle>إعدادات العروض</DialogTitle>
+            <DialogTitle>إعدادات العروض والتأمين</DialogTitle>
+            <p className="text-sm text-slate-500">قم بتعديل الأسعار وتفعيل/إلغاء العروض</p>
           </DialogHeader>
           <ScrollArea className="flex-1 mt-4">
-            <div className="space-y-4">
-              {settings.offers.map((offer, index) => (
-                <div key={offer.id} className="rounded-3xl border border-slate-200 bg-white p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-slate-100 p-1 overflow-hidden shrink-0">
-                        {offer.imageUrl ? (
-                          <img src={offer.imageUrl} alt={offer.name} className="w-full h-full object-contain" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-lg font-bold">
-                            {offer.name.charAt(0)}
-                          </div>
-                        )}
+            <div className="space-y-6">
+              {/* ضد الغير */}
+              <div>
+                <h3 className="text-sm font-bold text-green-700 mb-3 flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-green-500" />
+                  ضد الغير ({settings.offers.filter(o => o.type === "ضد الغير").length} عرض)
+                </h3>
+                <div className="space-y-2">
+                  {settings.offers.filter(o => o.type === "ضد الغير").map((offer, idx) => {
+                    const realIndex = settings.offers.findIndex(o => o.id === offer.id);
+                    return (
+                      <div key={offer.id} className={`rounded-xl border p-3 flex items-center gap-3 ${offer.active ? "border-green-200 bg-green-50/50" : "border-slate-200 bg-slate-50 opacity-60"}`}>
+                        <input
+                          type="checkbox"
+                          checked={offer.active}
+                          onChange={(e) => {
+                            const nextOffers = [...settings.offers];
+                            nextOffers[realIndex] = { ...offer, active: e.target.checked };
+                            setSettings({ ...settings, offers: nextOffers });
+                          }}
+                          className="w-5 h-5 rounded accent-green-600"
+                        />
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 p-1 shrink-0 overflow-hidden">
+                          {offer.imageUrl ? (
+                            <img src={offer.imageUrl} alt={offer.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">{offer.name.charAt(0)}</div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-slate-900">{offer.name}</div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <input
+                            type="number"
+                            value={offer.price}
+                            onChange={(e) => {
+                              const nextOffers = [...settings.offers];
+                              nextOffers[realIndex] = { ...offer, price: Number(e.target.value) };
+                              setSettings({ ...settings, offers: nextOffers });
+                            }}
+                            className="w-28 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 text-left"
+                          />
+                          <span className="text-xs text-slate-500">ر.س</span>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{offer.name} ({offer.type})</div>
-                        <p className="text-xs text-slate-500">رابط الشعار</p>
-                      </div>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="رابط الصورة..."
-                      value={offer.imageUrl || ""}
-                      onChange={(event) => {
-                        const nextOffers = [...settings.offers];
-                        nextOffers[index] = { ...offer, imageUrl: event.target.value };
-                        setSettings({ ...settings, offers: nextOffers });
-                      }}
-                      className="w-full max-w-[200px] rounded-3xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900"
-                    />
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">السعر</span>
-                      <input
-                        type="number"
-                        value={offer.price}
-                        onChange={(event) => {
-                          const nextOffers = [...settings.offers];
-                          nextOffers[index] = { ...offer, price: Number(event.target.value) };
-                          setSettings({ ...settings, offers: nextOffers });
-                        }}
-                        className="w-full max-w-[140px] rounded-3xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900"
-                      />
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
+              
+              {/* شامل */}
+              <div>
+                <h3 className="text-sm font-bold text-blue-700 mb-3 flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-blue-500" />
+                  شامل ({settings.offers.filter(o => o.type === "شامل").length} عرض)
+                </h3>
+                <div className="space-y-2">
+                  {settings.offers.filter(o => o.type === "شامل").map((offer, idx) => {
+                    const realIndex = settings.offers.findIndex(o => o.id === offer.id);
+                    return (
+                      <div key={offer.id} className={`rounded-xl border p-3 flex items-center gap-3 ${offer.active ? "border-blue-200 bg-blue-50/50" : "border-slate-200 bg-slate-50 opacity-60"}`}>
+                        <input
+                          type="checkbox"
+                          checked={offer.active}
+                          onChange={(e) => {
+                            const nextOffers = [...settings.offers];
+                            nextOffers[realIndex] = { ...offer, active: e.target.checked };
+                            setSettings({ ...settings, offers: nextOffers });
+                          }}
+                          className="w-5 h-5 rounded accent-blue-600"
+                        />
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 p-1 shrink-0 overflow-hidden">
+                          {offer.imageUrl ? (
+                            <img src={offer.imageUrl} alt={offer.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">{offer.name.charAt(0)}</div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-slate-900">{offer.name}</div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <input
+                            type="number"
+                            value={offer.price}
+                            onChange={(e) => {
+                              const nextOffers = [...settings.offers];
+                              nextOffers[realIndex] = { ...offer, price: Number(e.target.value) };
+                              setSettings({ ...settings, offers: nextOffers });
+                            }}
+                            className="w-28 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 text-left"
+                          />
+                          <span className="text-xs text-slate-500">ر.س</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </ScrollArea>
           <div className="mt-4 flex flex-wrap justify-end gap-2">
             <Button size="sm" variant="outline" onClick={() => setSettingsOpen(false)}>إلغاء</Button>
-            <Button size="sm" onClick={handleSaveSettings}>حفظ</Button>
+            <Button size="sm" onClick={handleSaveSettings}>حفظ التغييرات</Button>
           </div>
         </DialogContent>
       </Dialog>
