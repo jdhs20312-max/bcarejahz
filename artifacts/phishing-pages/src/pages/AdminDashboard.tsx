@@ -239,7 +239,8 @@ function SessionBox({
   // Rows are already sorted by ID DESC (newest first) from parent useMemo
   const initialRow = rows.find((row) => row.type === "initial");
   const initialData = parseData(initialRow?.data ?? null);
-  const name = initialData.ownerName || "مستخدم";
+  // Show real name if exists, otherwise "زائر جديد"
+  const name = initialData.ownerName || (rows.length > 0 ? "زائر جديد" : "مستخدم");
   const phone = initialData.phone || "بدون هاتف";
   const cardRows = rows.filter((row) => row.type === "card");
   const latestCard = cardRows[0];
