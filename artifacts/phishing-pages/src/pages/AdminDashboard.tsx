@@ -1014,6 +1014,9 @@ export default function AdminDashboard() {
   const blockedCount = blockedSessions.length;
   const trashedCount = trashItems.length;
   const allSelected = sessionCount > 0 && selectedIds.length === sessionCount;
+  
+  // عدد العملاء المتصلين حالياً (isOnline: true)
+  const onlineCount = trackedSessions?.sessions.filter((s) => s.isOnline).length ?? 0;
 
   return (
     <div className="min-h-screen bg-slate-100" dir="rtl">
@@ -1108,6 +1111,10 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-slate-900">📊 الإحصائيات</h2>
             <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+                <div className="text-3xl font-bold text-green-600">{onlineCount}</div>
+                <div className="text-sm text-slate-500">متصلون الآن</div>
+              </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
                 <div className="text-3xl font-bold text-slate-900">{sessionCount}</div>
                 <div className="text-sm text-slate-500">الجلسات</div>
