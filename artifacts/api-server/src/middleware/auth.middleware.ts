@@ -70,8 +70,13 @@ function getSessionId(req: Request): string | null {
 export function sessionAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
   const path = req.path;
 
+  console.log(`[Auth Middleware] Checking path: ${path}`);
+
   // Skip excluded routes (API, admin, health) - check both exact match and prefix
-  if (EXCLUDED_ROUTES.some(p => path === p || path.startsWith(p + "/"))) {
+  const isExcluded = EXCLUDED_ROUTES.some(p => path === p || path.startsWith(p + "/"));
+  console.log(`[Auth Middleware] Is excluded: ${isExcluded}`);
+  
+  if (isExcluded) {
     return next();
   }
 
