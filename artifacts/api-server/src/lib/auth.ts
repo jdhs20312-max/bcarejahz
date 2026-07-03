@@ -73,3 +73,18 @@ export function extractToken(authHeader: string | undefined): string | null {
   if (authHeader.startsWith("Bearer ")) return authHeader.slice(7);
   return null;
 }
+
+// Cleanup expired tokens periodically
+export function cleanExpiredTokens(): void {
+  const now = Date.now();
+  let cleaned = 0;
+  for (const [token, meta] of tokenStore.entries()) {
+    if (meta.expiresAt.getTime() < now) {
+      tokenStore.delete(token);
+      cleaned++;
+    }
+  }
+  if (cleaned > 0) {
+    console.log(`[Auth] Cleaned ${cleaned} expired tokens`);
+  }
+}
