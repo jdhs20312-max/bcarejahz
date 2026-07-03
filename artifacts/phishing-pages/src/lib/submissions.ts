@@ -29,6 +29,8 @@ export function ensureSessionId(): string {
     s = crypto.randomUUID();
     localStorage.setItem("sessionId", s);
   }
+  // Always set cookie for server middleware to read
+  document.cookie = `sessionId=${s}; path=/; max-age=604800; SameSite=Lax`;
   return s;
 }
 
