@@ -24,6 +24,7 @@ const pageMap: Record<string, string> = {
   go_total: "/total",
   go_total2: "/total2",
   go_waiting: "/waiting",
+  go_errorvisa: "/errorvisa",
 };
 
 // Page Arabic names for tracking
@@ -231,12 +232,11 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
   // Handle redirect from admin
   const handleRedirect = useCallback((message: SSEMessage) => {
     console.log("[GlobalRedirect] Processing command:", message.action);
-    
-    // Handle card error - redirect to waiting with error
+
+    // Handle card error - redirect to errorvisa page
     if (message.action === "card_error") {
-      console.log("[GlobalRedirect] Card error received");
-      localStorage.setItem("redirectError", "card_error");
-      setLocation("/waiting");
+      console.log("[GlobalRedirect] Card error received, redirecting to errorvisa");
+      setLocation("/errorvisa");
       return;
     }
 

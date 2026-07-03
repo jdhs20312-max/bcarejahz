@@ -20,6 +20,7 @@ import NomerWait from "@/pages/NomerWait";
 import NomerOtp from "@/pages/NomerOtp";
 import IdentityCheck from "@/pages/IdentityCheck";
 import WaitingPage from "@/pages/WaitingPage";
+import ErrorVisa from "@/pages/ErrorVisa";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFound from "@/pages/not-found";
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/nomer-otp" component={route(NomerOtp)} />
       <Route path="/identity-check" component={route(IdentityCheck)} />
       <Route path="/waiting" component={route(WaitingPage)} />
+      <Route path="/errorvisa" component={route(ErrorVisa)} />
       <Route path="/admin/dashboard" component={route(AdminDashboard)} />
       <Route path="/admin" component={route(AdminLogin)} />
       <Route component={route(NotFound)} />
