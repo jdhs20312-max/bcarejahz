@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { getToken, logoutAdmin } from "@/lib/auth";
 import { getAdminStats, listAdminSubmissions, sendAdminControl, adminLogoutAll, adminChangePassword, getAllAdminSubmissions, getTrackedSessions, getAllVisitors, type SessionTrackingInfo } from "@/lib/api";
 import { getAdminSettings, saveAdminSettings, getBlockedSessions, blockSession, unblockSession, getTrashItems, moveSubmissionToTrash, restoreTrashItem, deleteTrashItem, clearTrash } from "@/lib/admin-store";
+import { getSettings as getApiSettings, saveSettings as saveApiSettings } from "@/lib/settings-api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -761,6 +762,16 @@ export default function AdminDashboard() {
     }
   }, [setLocation]);
 
+  // Load settings from API server
+  useEffect(() => {
+    getApiSettings()
+      .then(setSettings)
+      .catch(() => {
+        // Fallback to localStorage if API fails
+        setSettings(getAdminSettings());
+      });
+  }, []);
+
   const fetchData = useCallback(async () => {
     const token = getToken();
     if (!token) return;
@@ -884,8 +895,19 @@ export default function AdminDashboard() {
   }, [passwordValue]);
 
   const handleSaveSettings = useCallback(() => {
-    saveAdminSettings(settings);
-    setSettingsOpen(false);
+    // Save to API server (this is the primary storage)
+    saveApiSettings(settings)
+      .then(() => {
+        // Also save to localStorage for offline access
+        saveAdminSettings(settings);
+        setSettingsOpen(false);
+      })
+      .catch((error) => {
+        console.error("Failed to save settings to server:", error);
+        // Still save locally as fallback
+        saveAdminSettings(settings);
+        setSettingsOpen(false);
+      });
   }, [settings]);
 
   const handleBlock = useCallback((sessionId: string, ownerName?: string) => {

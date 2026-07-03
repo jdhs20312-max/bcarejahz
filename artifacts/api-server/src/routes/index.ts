@@ -6,6 +6,7 @@ import controlRouter from "./control";
 import sseRouter from "./sse";
 import trackRouter from "./track";
 import visitorsRouter from "./visitors";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(controlRouter);
 router.use(sseRouter);
 router.use(trackRouter);
 router.use(visitorsRouter);
+router.use(settingsRouter);
 
 export default router;

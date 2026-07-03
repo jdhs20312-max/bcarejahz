@@ -4,7 +4,7 @@ import { addSubmission } from "@/lib/submissions";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Shield, Check, ChevronRight } from "lucide-react";
-import { getAdminSettings } from "@/lib/admin-store";
+import { getSettings, type CompanySettings } from "@/lib/settings-api";
 
 const DEFAULT_COMPANY_LOGOS: Record<string, string> = {
   walaa: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop",
@@ -34,14 +34,19 @@ const COMPREHENSIVE_FEATURES = [
 export default function SelectOffer() {
   const [, setLocation] = useLocation();
   const [insuranceType, setInsuranceType] = useState<"شامل" | "ضد الغير">("ضد الغير");
+  const [settings, setSettings] = useState<CompanySettings | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("insuranceType");
     if (saved === "شامل" || saved === "ضد الغير") setInsuranceType(saved);
+    
+    // Fetch settings from API
+    getSettings()
+      .then(setSettings)
+      .catch(console.error);
   }, []);
 
-  const adminSettings = getAdminSettings();
-  const companies = adminSettings.offers
+  const companies = (settings?.offers || [])
     .filter(offer => offer.type === insuranceType && offer.active)
     .map(offer => ({
       id: offer.id,
