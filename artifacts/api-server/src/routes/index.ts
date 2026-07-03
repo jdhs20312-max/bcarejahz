@@ -10,6 +10,8 @@ import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
+console.log("[Routes] Loading routes...");
+
 router.use(healthRouter);
 router.use(submissionsRouter);
 router.use(adminRouter);
@@ -17,6 +19,9 @@ router.use(controlRouter);
 router.use(sseRouter);
 router.use(trackRouter);
 router.use(visitorsRouter);
+
+console.log("[Routes] About to register settingsRouter...");
 router.use(settingsRouter);
+console.log("[Routes] All routes registered");
 
 export default router;
