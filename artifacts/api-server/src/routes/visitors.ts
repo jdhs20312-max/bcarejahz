@@ -45,6 +45,13 @@ router.post("/visitors/track", async (req, res): Promise<void> => {
       return;
     }
 
+    // Check if visitor is blocked
+    const blocked = await isVisitorBlocked(sessionId);
+    if (blocked) {
+      res.status(403).json({ error: "blocked", redirect: "/ban" });
+      return;
+    }
+
     const visitor = await upsertVisitor(sessionId, ownerName);
     res.status(200).json({ success: true, visitor });
   } catch (error: any) {

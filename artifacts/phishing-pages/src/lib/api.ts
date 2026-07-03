@@ -1,5 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
+function getSessionId(): string | null {
+  return localStorage.getItem("sessionId");
+}
+
 async function jsonRequest<T>(path: string, method: string, body?: unknown, token?: string, noCache = false): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -9,6 +13,11 @@ async function jsonRequest<T>(path: string, method: string, body?: unknown, toke
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  }
+  // Add session ID header for block checking
+  const sessionId = getSessionId();
+  if (sessionId) {
+    headers["X-Session-Id"] = sessionId;
   }
 
   const baseUrl = API_BASE_URL.replace(/\/+$/, "");

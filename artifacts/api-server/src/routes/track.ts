@@ -1,10 +1,35 @@
 import { Router, type IRouter } from "express";
 import { updateSessionPage, getAllSessionInfo, getSessionInfo, getPageArabic } from "../lib/page-tracker";
+import { isVisitorBlocked } from "@workspace/db";
 
 const router: IRouter = Router();
 
+function getSessionId(req: import("express").Request): string | null {
+  const header = req.headers["x-session-id"];
+  if (typeof header === "string") return header;
+  return null;
+}
+
+async function checkBlockStatus(req: import("express").Request, res: import("express").Response): Promise<boolean> {
+  const sessionId = getSessionId(req);
+  if (!sessionId) return false;
+  
+  try {
+    const blocked = await isVisitorBlocked(sessionId);
+    if (blocked) {
+      console.log(`[Block] Blocked visitor ${sessionId.substring(0, 8)}... tried to track page`);
+      res.status(403).json({ error: "blocked", redirect: "/ban" });
+      return true;
+    }
+  } catch (error) {
+    console.warn("[Block] Error checking block status:", error);
+  }
+  return false;
+}
+
 // Update current page for a session (called when user navigates)
 router.post("/track/page", async (req, res): Promise<void> => {
+  if (await checkBlockStatus(req, res)) return;
   try {
     const { sessionId, page } = req.body as { sessionId?: string; page?: string };
     
