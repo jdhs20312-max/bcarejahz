@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCompanySettings, saveCompanySettings, type CompanySettings } from "@workspace/db";
+import { getCompanySettings, saveCompanySettings } from "@workspace/db";
 
 const router = Router();
 
@@ -24,8 +24,7 @@ router.post("/", async (req, res) => {
   console.log("[Settings Router] Request method:", req.method);
   console.log("[Settings Router] Request body:", JSON.stringify(req.body).substring(0, 200));
   
-  // Check if it's an update (has offers) or something else
-  const settings = req.body as CompanySettings;
+  const settings = req.body;
   
   if (!settings || !Array.isArray(settings.offers)) {
     console.error("[Settings POST] Invalid format:", settings);
