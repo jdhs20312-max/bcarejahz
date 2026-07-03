@@ -99,11 +99,13 @@ export default function Home() {
       <Header />
       <div className="bg-primary text-white py-10 md:py-14 relative overflow-hidden">
         {/* خلفية الصورة */}
-        <img 
-          src="https://bcare.com.sa/assets/images/left.svg" 
-          alt="Background"
-          className="absolute inset-0 w-full h-full object-cover rotate-100 scale-150"
-        />
+        <div className="absolute inset-0 overflow-hidden z-0">
+          <img
+            src="https://bcare.com.sa/assets/images/left.svg"
+            alt="Background Icons"
+            className="w-[120%] h-[120%] object-contain rotate-[-15deg] opacity-20 -ml-[10%] -mt-[10%]"
+          />
+        </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-2xl md:text-4xl font-bold mb-3">المنصة الأذكى لمقارنة عروض تأمين السيارات في السعودية</h1>
           <p className="text-base opacity-85 max-w-xl mx-auto">
