@@ -22,15 +22,25 @@ export async function getSettings(): Promise<CompanySettings> {
 }
 
 export async function saveSettings(settings: CompanySettings): Promise<CompanySettings> {
-  const response = await fetch(`${API_BASE_URL}/settings`, {
+  const url = `${API_BASE_URL}/settings`;
+  console.log("[Settings API] Saving settings to:", url);
+  console.log("[Settings API] Settings:", settings);
+  
+  const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(settings),
   });
+
+  console.log("[Settings API] Response status:", response.status);
+
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[Settings API] Error response:", errorText);
     throw new Error("Failed to save settings");
   }
+
   return response.json();
 }
