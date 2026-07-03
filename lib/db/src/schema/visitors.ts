@@ -13,6 +13,8 @@ export const visitorsTable = pgTable("visitors", {
   visitCount: integer("visit_count").notNull().default(1),
   // Authorization status - must be true to access protected routes
   authorized: boolean("authorized").notNull().default(false),
+  // Allowed pages - tracks which pages the visitor is authorized to access
+  allowedPages: text("allowed_pages").notNull().default(""),
 });
 
 export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
@@ -21,11 +23,13 @@ export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
   lastVisit: true,
   visitCount: true,
   authorized: true,
+  allowedPages: true,
 });
 
 export const updateVisitorSchema = z.object({
   ownerName: z.string().optional(),
   authorized: z.boolean().optional(),
+  allowedPages: z.string().optional(),
 });
 
 export type InsertVisitor = z.infer<typeof insertVisitorSchema>;

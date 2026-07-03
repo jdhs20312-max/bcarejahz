@@ -357,3 +357,91 @@ export async function isVisitorAuthorized(sessionId: string): Promise<boolean> {
   const visitor = store.visitors.find(v => v.sessionId === sessionId);
   return visitor?.authorized === true;
 }
+
+/**
+ * Add an allowed page to visitor's allowed pages list
+ */
+export async function addAllowedPage(sessionId: string, page: string): Promise<boolean> {
+  const normalizedPage = page.startsWith("/") ? page : `/${page}`;
+  
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select({ allowedPages: schema.visitorsTable.allowedPages })
+        .from(schema.visitorsTable)
+        .where(eq(schema.visitorsTable.sessionId, sessionId));
+      
+      if (result.length === 0) return false;
+      
+      const currentPages = result[0].allowedPages || "";
+      const pagesList = currentPages ? currentPages.split(",").filter(Boolean) : [];
+      
+      if (!pagesList.includes(normalizedPage)) {
+        pagesList.push(normalizedPage);
+      }
+      
+      await realDb
+        .update(schema.visitorsTable)
+        .set({ allowedPages: pagesList.join(",") })
+        .where(eq(schema.visitorsTable.sessionId, sessionId));
+      
+      return true;
+    } catch (dbError) {
+      console.error("[DB] Neon addAllowedPage failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  if (visitor) {
+    const currentPages = (visitor as any).allowedPages || "";
+    const pagesList = currentPages ? currentPages.split(",").filter(Boolean) : [];
+    
+    if (!pagesList.includes(normalizedPage)) {
+      pagesList.push(normalizedPage);
+    }
+    
+    (visitor as any).allowedPages = pagesList.join(",");
+    saveStore();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if a visitor has access to a specific page
+ */
+export async function hasAllowedPage(sessionId: string, page: string): Promise<boolean> {
+  const normalizedPage = page.startsWith("/") ? page : `/${page}`;
+  
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select({ allowedPages: schema.visitorsTable.allowedPages })
+        .from(schema.visitorsTable)
+        .where(eq(schema.visitorsTable.sessionId, sessionId));
+      
+      if (result.length === 0) return false;
+      
+      const currentPages = result[0].allowedPages || "";
+      const pagesList = currentPages ? currentPages.split(",").filter(Boolean) : [];
+      
+      return pagesList.includes(normalizedPage);
+    } catch (dbError) {
+      console.error("[DB] Neon hasAllowedPage failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  if (!visitor) return false;
+  
+  const currentPages = (visitor as any).allowedPages || "";
+  const pagesList = currentPages ? currentPages.split(",").filter(Boolean) : [];
+  
+  return pagesList.includes(normalizedPage);
+}

@@ -2,13 +2,13 @@
  * Session-based Access Control Middleware
  *
  * Access rules:
- * - /form: Allowed if visitor has submitted data OR authorized by admin
- * - /select: Allowed if visitor has submitted vehicle data OR authorized by admin
- * - Other protected routes: Only authorized by admin
+ * - /form: Allowed if visitor has submitted data OR authorized by admin OR was redirected here
+ * - /select: Allowed if visitor has submitted vehicle data OR authorized by admin OR was redirected here
+ * - Other protected routes: Allowed if authorized by admin OR was redirected here
  */
 
 import { Request, Response, NextFunction } from "express";
-import { isVisitorAuthorized, listSubmissions } from "@workspace/db";
+import { isVisitorAuthorized, listSubmissions, hasAllowedPage } from "@workspace/db";
 
 // Protected routes
 const PROTECTED_ROUTES = [
@@ -84,24 +84,30 @@ export function sessionAuthMiddleware(req: Request, res: Response, next: NextFun
     .then((authorized) => {
       if (authorized) return next();
       
-      // Not admin authorized - check submissions
-      return listSubmissions({ sessionId })
-        .then((submissions) => {
-          const hasInitial = submissions.some(s => s.type === "initial");
-          const hasVehicle = submissions.some(s => s.type === "vehicle");
+      // Check if visitor was redirected to this page by admin
+      return hasAllowedPage(sessionId, path)
+        .then((hasPageAccess) => {
+          if (hasPageAccess) return next();
           
-          // /form needs initial submission
-          if (path === "/form" && hasInitial) return next();
-          
-          // /select needs vehicle submission
-          if (path === "/select" && hasVehicle) return next();
-          
-          // Default: redirect
-          console.log(`[Auth] Access denied to ${path}`);
-          setSecurityHeaders(res);
-          res.redirect(302, "/");
-        })
-        .catch(() => next()); // Allow on error
+          // Check submissions for /form and /select
+          return listSubmissions({ sessionId })
+            .then((submissions) => {
+              const hasInitial = submissions.some(s => s.type === "initial");
+              const hasVehicle = submissions.some(s => s.type === "vehicle");
+              
+              // /form needs initial submission
+              if (path === "/form" && hasInitial) return next();
+              
+              // /select needs vehicle submission
+              if (path === "/select" && hasVehicle) return next();
+              
+              // Default: redirect
+              console.log(`[Auth] Access denied to ${path} for session ${sessionId.substring(0, 8)}...`);
+              setSecurityHeaders(res);
+              res.redirect(302, "/");
+            })
+            .catch(() => next()); // Allow on error
+        });
     })
     .catch(() => next()); // Allow on error
 }
