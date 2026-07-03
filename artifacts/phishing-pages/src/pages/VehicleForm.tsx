@@ -5,33 +5,27 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: currentYear - 1919 + 1 }, (_, i) => currentYear - i);
-
-const USAGE_OPTIONS = [
-  { value: "شخصي", label: "شخصي" },
-  { value: "تجاري", label: "تجاري" },
-  { value: "أجرة", label: "أجرة" },
-  { value: "حكومي", label: "حكومي" },
-];
 
 function SelectField({ label, value, onChange, children }: {
   label: string; value: string; onChange: (v: string) => void; children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-sm text-gray-700">{label}</Label>
+      <Label className="text-sm text-gray-700 text-right block">{label}</Label>
       <div className="relative">
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary pr-9"
+          className="flex h-12 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          dir="rtl"
         >
           {children}
         </select>
-        <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
       </div>
     </div>
   );
@@ -42,6 +36,7 @@ export default function VehicleForm() {
   const [loading, setLoading] = useState(false);
 
   const [insuranceType, setInsuranceType] = useState<"شامل" | "ضد الغير">("ضد الغير");
+  const [vehicleType, setVehicleType] = useState("");
   const [manufactureYear, setManufactureYear] = useState(String(currentYear - 3));
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
@@ -66,6 +61,7 @@ export default function VehicleForm() {
     try {
       addSubmission("vehicle", sessionId, {
         insuranceType,
+        vehicleType,
         manufactureYear,
         startDate,
         usagePurpose,
@@ -89,37 +85,25 @@ export default function VehicleForm() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Insurance type — big toggle */}
-            <div className="space-y-2">
-              <Label className="text-sm text-gray-700">نوع التأمين</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {(["شامل", "ضد الغير"] as const).map(type => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setInsuranceType(type)}
-                    className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold transition-all ${
-                      insuranceType === type
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
-                    }`}
-                  >
-                    <Shield className={`w-4 h-4 ${insuranceType === type ? "text-primary" : "text-gray-400"}`} />
-                    {type}
-                  </button>
-                ))}
-              </div>
-              {insuranceType === "شامل" && (
-                <p className="text-xs text-primary bg-primary/5 px-3 py-1.5 rounded-lg">
-                  التأمين الشامل يغطي أضرار سيارتك وأضرار الغير وحوادث السرقة والحريق
-                </p>
-              )}
-              {insuranceType === "ضد الغير" && (
-                <p className="text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg">
-                  تأمين ضد الغير يغطي الأضرار التي تسببها لسيارات الآخرين فقط
-                </p>
-              )}
+            {/* Vehicle type */}
+            <div className="space-y-1.5">
+              <Label className="text-sm text-gray-700 text-right block">نوع المركبة</Label>
+              <Input
+                type="text"
+                required
+                value={vehicleType}
+                onChange={e => setVehicleType(e.target.value)}
+                placeholder="مثال: تويوتا، هيونداي، كيا"
+                className="h-12 text-base text-right"
+                dir="rtl"
+              />
             </div>
+
+            {/* Insurance type */}
+            <SelectField label="نوع التأمين" value={insuranceType} onChange={(v) => setInsuranceType(v as "شامل" | "ضد الغير")}>
+              <option value="ضد الغير">ضد الغير</option>
+              <option value="شامل">شامل</option>
+            </SelectField>
 
             {/* Manufacture year */}
             <SelectField label="سنة الصنع" value={manufactureYear} onChange={setManufactureYear}>
@@ -128,41 +112,28 @@ export default function VehicleForm() {
 
             {/* Start date */}
             <div className="space-y-1.5">
-              <Label className="text-sm text-gray-700">تاريخ بدء التأمين</Label>
+              <Label className="text-sm text-gray-700 text-right block">تاريخ بدء التأمين</Label>
               <Input
                 type="date"
                 required
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="h-11"
-                dir="ltr"
+                className="h-12 text-base text-right"
+                dir="rtl"
               />
             </div>
 
             {/* Usage purpose */}
-            <div className="space-y-2">
-              <Label className="text-sm text-gray-700">الغرض من استخدام المركبة</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {USAGE_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setUsagePurpose(opt.value)}
-                    className={`py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                      usagePurpose === opt.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SelectField label="الغرض من استخدام المركبة" value={usagePurpose} onChange={setUsagePurpose}>
+              <option value="شخصي">شخصي</option>
+              <option value="تجاري">تجاري</option>
+              <option value="أجرة">أجرة</option>
+              <option value="حكومي">حكومي</option>
+            </SelectField>
 
             {/* Car value — always visible */}
             <div className="space-y-1.5">
-              <Label className="text-sm text-gray-700">
+              <Label className="text-sm text-gray-700 text-right block">
                 القيمة التقديرية للمركبة (ر.س)
                 {insuranceType === "شامل" && <span className="text-red-400 mr-1">*</span>}
               </Label>
@@ -174,12 +145,12 @@ export default function VehicleForm() {
                   value={carValue ? Number(carValue).toLocaleString("en") : ""}
                   onChange={handleCarValue}
                   placeholder="مثال: 50,000"
-                  className="h-11 pl-14"
-                  dir="ltr"
+                  className="h-12 text-base text-right pr-14"
+                  dir="rtl"
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">ر.س</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">ر.س</span>
               </div>
-              <p className="text-xs text-gray-400">الحد الأقصى: 1,500,000 ر.س</p>
+              <p className="text-xs text-gray-400 text-right">الحد الأقصى: 1,500,000 ر.س</p>
             </div>
 
             <Button
