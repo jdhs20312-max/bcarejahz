@@ -113,13 +113,14 @@ export default function VehicleForm() {
             {/* Start date */}
             <div className="space-y-3">
               <Label className="text-sm text-gray-700 text-right block">تاريخ بدء التأمين</Label>
-              <Input
+              <input
                 type="date"
                 required
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="h-12 text-base text-right rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary w-full"
+                className="h-12 text-base text-right rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary w-full px-3 py-2 bg-white"
                 dir="rtl"
+                style={{ fontSize: '16px' }}
               />
             </div>
 
