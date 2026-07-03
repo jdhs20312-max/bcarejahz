@@ -65,7 +65,7 @@ export default function SelectOffer() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fa] flex flex-col" dir="rtl">
-      <Header title="اختر العرض" />
+      <Header />
 
       <main className="flex-1 p-4">
         {/* Type Toggle */}
