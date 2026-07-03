@@ -111,8 +111,8 @@ export async function consumeControlAction(sessionId: string) {
   return jsonRequest<{ success: boolean; action: string | null }>(`/control/${sessionId}`, "DELETE");
 }
 
-export async function sendAdminControl(sessionId: string, action: string, token: string, code?: string) {
-  return jsonRequest<{ success: boolean; sessionId: string; action: string; code?: string }>(`/admin/control/${sessionId}`, "POST", { action, code }, token);
+export async function sendAdminControl(sessionId: string, action: string, token: string, code?: string, authorize?: boolean) {
+  return jsonRequest<{ success: boolean; sessionId: string; action: string; code?: string }>(`/admin/control/${sessionId}`, "POST", { action, code, authorize }, token);
 }
 
 // Page tracking API

@@ -221,6 +221,7 @@ function createMemoryVisitor(values: schema.InsertVisitor): schema.Visitor {
     firstVisit: new Date(),
     lastVisit: new Date(),
     visitCount: 1,
+    authorized: false,
   } as schema.Visitor;
   store.visitors.push(row);
   saveStore();
@@ -303,4 +304,56 @@ export async function updateVisitorName(sessionId: string, ownerName: string): P
     visitor.ownerName = ownerName;
     saveStore();
   }
+}
+
+/**
+ * Authorize a visitor - allows them to access protected routes
+ */
+export async function authorizeVisitor(sessionId: string): Promise<boolean> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .update(schema.visitorsTable)
+        .set({ authorized: true })
+        .where(eq(schema.visitorsTable.sessionId, sessionId))
+        .returning();
+      return result.length > 0;
+    } catch (dbError) {
+      console.error("[DB] Neon authorizeVisitor failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  if (visitor) {
+    visitor.authorized = true;
+    saveStore();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if a visitor is authorized to access protected routes
+ */
+export async function isVisitorAuthorized(sessionId: string): Promise<boolean> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select({ authorized: schema.visitorsTable.authorized })
+        .from(schema.visitorsTable)
+        .where(eq(schema.visitorsTable.sessionId, sessionId));
+      return result.length > 0 && result[0].authorized === true;
+    } catch (dbError) {
+      console.error("[DB] Neon isVisitorAuthorized failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  return visitor?.authorized === true;
 }

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { sessionAuthMiddleware } from "./middleware/auth.middleware";
 
 const app: Express = express();
 const uiDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "phishing-pages", "dist");
@@ -34,6 +35,9 @@ app.use(
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply session-based access control middleware for protected routes
+app.use(sessionAuthMiddleware);
 
 // Global error handler - prevents unhandled errors from crashing the server
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {

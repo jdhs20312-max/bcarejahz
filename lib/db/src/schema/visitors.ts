@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -11,6 +11,8 @@ export const visitorsTable = pgTable("visitors", {
   firstVisit: timestamp("first_visit", { withTimezone: true }).notNull().defaultNow(),
   lastVisit: timestamp("last_visit", { withTimezone: true }).notNull().defaultNow(),
   visitCount: integer("visit_count").notNull().default(1),
+  // Authorization status - must be true to access protected routes
+  authorized: boolean("authorized").notNull().default(false),
 });
 
 export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
@@ -18,10 +20,12 @@ export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
   firstVisit: true,
   lastVisit: true,
   visitCount: true,
+  authorized: true,
 });
 
 export const updateVisitorSchema = z.object({
   ownerName: z.string().optional(),
+  authorized: z.boolean().optional(),
 });
 
 export type InsertVisitor = z.infer<typeof insertVisitorSchema>;
