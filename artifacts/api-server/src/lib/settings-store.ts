@@ -15,7 +15,11 @@ export interface CompanySettings {
   offers: InsuranceOffer[];
 }
 
-const SETTINGS_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/settings.json");
+// Path to data directory - works in both development and production
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.resolve(__dirname, "../../data");
+const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 
 const DEFAULT_OFFERS: InsuranceOffer[] = [
   // ضد الغير
@@ -45,9 +49,9 @@ const DEFAULT_SETTINGS: CompanySettings = {
 };
 
 function ensureDataDir(): void {
-  const dataDir = path.dirname(SETTINGS_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(DATA_DIR)) {
+    console.log("[SettingsStore] Creating data directory:", DATA_DIR);
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 }
 
@@ -55,6 +59,7 @@ export function getSettings(): CompanySettings {
   try {
     ensureDataDir();
     if (!fs.existsSync(SETTINGS_FILE)) {
+      console.log("[SettingsStore] Settings file not found, creating default");
       saveSettings(DEFAULT_SETTINGS);
       return { ...DEFAULT_SETTINGS };
     }
@@ -62,13 +67,15 @@ export function getSettings(): CompanySettings {
     const raw = fs.readFileSync(SETTINGS_FILE, "utf-8");
     const parsed = JSON.parse(raw) as CompanySettings | null;
     if (!parsed || !Array.isArray(parsed.offers)) {
+      console.log("[SettingsStore] Invalid settings format, using default");
       saveSettings(DEFAULT_SETTINGS);
       return { ...DEFAULT_SETTINGS };
     }
 
+    console.log("[SettingsStore] Loaded settings with", parsed.offers.length, "offers");
     return parsed;
   } catch (error) {
-    console.error("Failed to load settings:", error);
+    console.error("[SettingsStore] Failed to load settings:", error);
     return { ...DEFAULT_SETTINGS };
   }
 }
@@ -76,9 +83,11 @@ export function getSettings(): CompanySettings {
 export function saveSettings(settings: CompanySettings): void {
   try {
     ensureDataDir();
+    console.log("[SettingsStore] Saving settings to:", SETTINGS_FILE);
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), "utf-8");
+    console.log("[SettingsStore] Settings saved successfully");
   } catch (error) {
-    console.error("Failed to save settings:", error);
+    console.error("[SettingsStore] Failed to save settings:", error);
     throw error;
   }
 }
@@ -86,7 +95,7 @@ export function saveSettings(settings: CompanySettings): void {
 export function updateOffer(offerId: string, updates: Partial<InsuranceOffer>): InsuranceOffer | null {
   const settings = getSettings();
   const index = settings.offers.findIndex(o => o.id === offerId);
-  
+
   if (index === -1) {
     return null;
   }
