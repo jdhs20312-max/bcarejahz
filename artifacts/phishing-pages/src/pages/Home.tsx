@@ -100,7 +100,7 @@ export default function Home() {
       <div className="bg-primary text-white py-10 md:py-14 relative overflow-hidden">
         {/* خلفية الصورة */}
         <img 
-          src="https://bcare.com.sa/assets/images/lcft.svg" 
+          src="https://bcare.com.sa/assets/images/left.svg" 
           alt="Background"
           className="absolute inset-0 w-full h-full object-fill"
         />
