@@ -7,15 +7,15 @@ import { Shield, Check, ChevronRight } from "lucide-react";
 import { getSettings, type CompanySettings } from "@/lib/settings-api";
 
 const DEFAULT_COMPANY_LOGOS: Record<string, string> = {
-  walaa: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop",
-  medgulf: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop",
-  malath: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?w=100&h=100&fit=crop",
-  buruj: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=100&h=100&fit=crop",
-  axa: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=100&h=100&fit=crop",
-  salama: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop",
-  tawuniya: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=100&h=100&fit=crop",
-  takaful: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=100&h=100&fit=crop",
-  alrajhi: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=100&h=100&fit=crop",
+  medgulf: "https://manhom.majarracdn.cloud/mgmt/images/44211/1730128444/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D9%85%D8%AA%D9%88%D8%B3%D8%B7-%D9%88%D8%A7%D9%84%D8%AE%D9%84%D9%8A%D8%AC-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D9%88%D8%A7%D8%B9%D8%A7%D8%AF%D8%A9-%D8%A7.webp",
+  walaa: "https://manhom.majarracdn.cloud/mgmt/images/6399/1730129361/%D9%88%D9%84%D8%A7%D8%A1-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86.webp",
+  malath: "https://manhom.majarracdn.cloud/mgmt/images/4457/1730189765/%D9%85%D9%84%D8%A7%D8%B0-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D9%88%D8%A7%D8%B9%D8%A7%D8%AF%D8%A9-%D8%A7%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A.webp",
+  buruj: "https://www.aleqt.com/_next/image?url=https%3A%2F%2Farchive-files.aleqt.com%2Frbitem%2F2022%2F05%2F22%2F1917191-950088230.png&w=1920&q=75",
+  axa: "https://amanleek.com/wp-content/uploads/2020/05/AXA-insurance-logo-300-x300.png",
+  salama: "https://manhom.majarracdn.cloud/mgmt/images/2169/1730137176/%D8%A7%D9%84%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%A5%D8%B3%D9%84%D8%A7%D9%85%D9%8A%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%B3%D9%84%D8%A7.webp",
+  takaful: "https://manhom.majarracdn.cloud/mgmt/images/6738/1730127273/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%B1%D8%A7%D8%AC%D8%AD%D9%8A-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A-%D8%AA%D9%83%D8%A7%D9%81.webp",
+  tawuniya: "",
+  alrajhi: "",
 };
 
 const THIRD_PARTY_FEATURES = [
