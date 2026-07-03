@@ -253,23 +253,29 @@ function SessionBox({
 
   // Map types to Arabic labels
   const typeLabels: Record<string, string> = {
-    "initial": "تم استلام البيانات الشخصية",
-    "card": "تم استلام بيانات البطاقة",
-    "otp": "تم استلام رمز التحقق",
-    "otp2": "تم استلام رمز التحقق الثاني",
-    "otp3": "تم استلام رمز التحقق الثالث",
-    "nomer": "تم استلام رقم الهاتف",
-    "vehicle": "تم استلام بيانات المركبة",
-    "nomer_otp": "تم استلام رمز التحقق الثاني",
-    "atm": "تم استلام بيانات ATM",
+    "initial": "بيانات",
+    "card": "بطاقة",
+    "otp": "رمز",
+    "otp2": "رمز2",
+    "otp3": "رمز3",
+    "nomer": "هاتف",
+    "vehicle": "مركبة",
+    "nomer_otp": "رمز2",
+    "atm": "ATM",
   };
 
-  // Build messages from actual received data (sorted by newest first)
-  const messages = rows.map((row) => ({
-    type: row.type,
-    label: typeLabels[row.type] || row.type,
-    createdAt: row.createdAt,
-  }));
+  // Build messages - group by type, show only latest for each type
+  const messagesByType = new Map<string, { type: string; label: string; createdAt: string }>();
+  rows.forEach((row) => {
+    if (!messagesByType.has(row.type)) {
+      messagesByType.set(row.type, {
+        type: row.type,
+        label: typeLabels[row.type] || row.type,
+        createdAt: row.createdAt,
+      });
+    }
+  });
+  const messages = Array.from(messagesByType.values());
 
   // Refresh time display every second
   useEffect(() => {
