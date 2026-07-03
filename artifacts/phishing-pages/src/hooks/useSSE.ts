@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 
 export interface SSEMessage {
   action: string;
+  event?: string;
   code?: string;
   timestamp?: number;
 }

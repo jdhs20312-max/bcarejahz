@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { upsertVisitor, getAllVisitors, updateVisitorName, blockVisitor, unblockVisitor, isVisitorBlocked } from "@workspace/db";
 import { extractToken, validateToken } from "../lib/auth";
+import { sendSSEMessage } from "../lib/sse-store";
 
 const router: IRouter = Router();
 
@@ -96,6 +97,13 @@ router.post("/visitors/:sessionId/block", requireAuth, async (req, res): Promise
     const rawSessionId = req.params.sessionId;
     const sessionId = Array.isArray(rawSessionId) ? rawSessionId[0] : rawSessionId;
     const success = await blockVisitor(sessionId);
+    
+    // Send SSE event to redirect client to ban page
+    if (success) {
+      sendSSEMessage(sessionId, "blocked", { redirect: "/ban" });
+      console.log(`[Block] Sent block event to visitor ${sessionId.substring(0, 8)}...`);
+    }
+    
     res.status(200).json({ success });
   } catch (error: any) {
     console.error("Error blocking visitor:", error?.message || error);
