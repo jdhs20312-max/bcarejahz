@@ -5,5 +5,5 @@ nodeVersion = "20"
 command = "pnpm install && pnpm --filter @workspace/api-server build && pnpm --filter @workspace/phishing-pages build"
 
 [deploy]
-startCommand = "node --enable-source-maps ./artifacts/api-server/dist/index.mjs"
+startCommand = "node --enable-source-maps artifacts/api-server/dist/index.mjs"
 healthCheckPath = "/health"
