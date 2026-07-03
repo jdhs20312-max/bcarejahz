@@ -1,4 +1,4 @@
-import { getApiUrl } from "./api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export interface InsuranceOffer {
   id: string;
@@ -14,7 +14,7 @@ export interface CompanySettings {
 }
 
 export async function getSettings(): Promise<CompanySettings> {
-  const response = await fetch(`${getApiUrl()}/settings`);
+  const response = await fetch(`${API_BASE_URL}/settings`);
   if (!response.ok) {
     throw new Error("Failed to get settings");
   }
@@ -22,7 +22,7 @@ export async function getSettings(): Promise<CompanySettings> {
 }
 
 export async function saveSettings(settings: CompanySettings): Promise<CompanySettings> {
-  const response = await fetch(`${getApiUrl()}/settings`, {
+  const response = await fetch(`${API_BASE_URL}/settings`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
