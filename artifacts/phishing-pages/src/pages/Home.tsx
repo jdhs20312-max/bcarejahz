@@ -150,17 +150,6 @@ export default function Home() {
                 {/* تأمين جديد */}
                 {formType === "تأمين جديد" && (
                   <>
-                    <div className="flex flex-col gap-2 mb-4">
-                      <label className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition-colors">
-                        <input type="radio" checked={subFormType === "استمارة"} onChange={() => setSubFormType("استمارة")} className="w-5 h-5 accent-primary" />
-                        <span className="text-sm font-medium">استمارة</span>
-                      </label>
-                      <label className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition-colors">
-                        <input type="radio" checked={subFormType === "بطاقة جمركية"} onChange={() => setSubFormType("بطاقة جمركية")} className="w-5 h-5 accent-primary" />
-                        <span className="text-sm font-medium">بطاقة جمركية</span>
-                      </label>
-                    </div>
-
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">رقم الهوية / الإقامة</Label>
                       <Input type="tel" required value={idNumber}
@@ -180,6 +169,18 @@ export default function Home() {
                       <Input type="tel" required value={phone}
                         onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                         placeholder="05XXXXXXXX" dir="ltr" className="h-12 text-base" />
+                    </div>
+
+                    {/* استمارة / بطاقة جمركية - أسفل رقم الهاتف */}
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setSubFormType("استمارة")}
+                        className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "استمارة" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
+                        استمارة
+                      </button>
+                      <button type="button" onClick={() => setSubFormType("بطاقة جمركية")}
+                        className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "بطاقة جمركية" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
+                        بطاقة جمركية
+                      </button>
                     </div>
 
                     <div className="space-y-1.5">
