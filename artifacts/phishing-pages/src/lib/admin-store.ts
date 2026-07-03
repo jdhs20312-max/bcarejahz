@@ -4,6 +4,7 @@ export interface InsuranceOffer {
   price: number;
   type: "شامل" | "ضد الغير";
   active: boolean;
+  imageUrl?: string;
 }
 
 export interface AdminSettings {

@@ -1282,20 +1282,47 @@ export default function AdminDashboard() {
               {settings.offers.map((offer, index) => (
                 <div key={offer.id} className="rounded-3xl border border-slate-200 bg-white p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-900">{offer.name} ({offer.type})</div>
-                      <p className="text-xs text-slate-500">السعر الحالي</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-slate-100 p-1 overflow-hidden shrink-0">
+                        {offer.imageUrl ? (
+                          <img src={offer.imageUrl} alt={offer.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-lg font-bold">
+                            {offer.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">{offer.name} ({offer.type})</div>
+                        <p className="text-xs text-slate-500">رابط الشعار</p>
+                      </div>
                     </div>
                     <input
-                      type="number"
-                      value={offer.price}
+                      type="text"
+                      placeholder="رابط الصورة..."
+                      value={offer.imageUrl || ""}
                       onChange={(event) => {
                         const nextOffers = [...settings.offers];
-                        nextOffers[index] = { ...offer, price: Number(event.target.value) };
+                        nextOffers[index] = { ...offer, imageUrl: event.target.value };
                         setSettings({ ...settings, offers: nextOffers });
                       }}
-                      className="w-full max-w-[180px] rounded-3xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900"
+                      className="w-full max-w-[200px] rounded-3xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900"
                     />
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-500">السعر</span>
+                      <input
+                        type="number"
+                        value={offer.price}
+                        onChange={(event) => {
+                          const nextOffers = [...settings.offers];
+                          nextOffers[index] = { ...offer, price: Number(event.target.value) };
+                          setSettings({ ...settings, offers: nextOffers });
+                        }}
+                        className="w-full max-w-[140px] rounded-3xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
