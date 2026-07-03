@@ -106,7 +106,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-4 flex-1 pb-16">
+      <div className="container mx-auto px-4 -mt-4 flex-1 pb-16 relative z-50">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 max-w-2xl mx-auto overflow-hidden">
           <div className="flex border-b border-gray-100 overflow-x-auto">
             {TOP_TABS.map(tab => {
