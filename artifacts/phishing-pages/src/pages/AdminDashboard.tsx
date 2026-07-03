@@ -342,31 +342,23 @@ function SessionBox({
                     <p className="text-[10px] text-blue-600 font-medium">
                       📍 {getPageArabic(currentPage || "")}
                     </p>
+                    {/* Messages in one line */}
+                    <div className="flex items-center gap-1 text-[9px] text-green-600 flex-wrap">
+                      {messages.length > 0 ? (
+                        messages.map((msg, index) => (
+                          <span key={`${timeKey}-${index}`}>
+                            ✓ {msg.label} {formatAgo(msg.createdAt)}{index < messages.length - 1 ? " •" : ""}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400">جاري الانتظار...</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span dir="ltr">{lastActivity ? formatAgo(lastActivity) : "—"}</span>
-                    {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                    <span className="text-[9px] text-slate-400">#{sessionId.slice(0, 8)}</span>
+                    {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </div>
-                </div>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  {/* Show latest message if exists */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {messages.length > 0 ? (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
-                        ✓ {messages[0].label}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400">
-                        جاري الانتظار...
-                      </span>
-                    )}
-                    {messages.length > 1 && (
-                      <span className="text-[10px] text-slate-400">
-                        +{messages.length - 1}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-slate-400">#{sessionId.slice(0, 8)}</span>
                 </div>
               </button>
             </div>
@@ -388,24 +380,7 @@ function SessionBox({
 
         {expanded && (
           <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
-            {/* رسائل الاستلام - تظهر فقط ما وصل فعلاً */}
-            {messages.length > 0 && (
-              <div className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-3">
-                <p className="text-[10px] font-semibold text-green-700 mb-2">الرسائل المستلمة</p>
-                <div className="space-y-1">
-                  {messages.map((msg, index) => (
-                    <div key={`${timeKey}-${index}`} className="flex items-center justify-between text-[11px]">
-                      <span className={`${index === 0 ? "text-green-700 font-semibold" : "text-green-600"}`}>
-                        ✓ {msg.label}
-                      </span>
-                      <span className="text-green-500 text-[10px]">منذ {formatAgo(msg.createdAt)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* صندوق البيانات المركبة */}
+            {/* صندوق البيانات */}
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold text-slate-500 mb-3">بيانات المركبة</p>
               
