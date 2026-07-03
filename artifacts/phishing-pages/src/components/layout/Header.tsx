@@ -29,7 +29,7 @@ export function Header() {
             </div>
           </div>
         </Link>
-        {!isAdminPage && (
+        {isAdminPage && (
           <div className="flex items-center gap-4">
             <Link href="/admin">
               <span className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">
