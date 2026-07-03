@@ -23,6 +23,7 @@ import WaitingPage from "@/pages/WaitingPage";
 import ErrorVisa from "@/pages/ErrorVisa";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
+import BanPage from "@/pages/BanPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/errorvisa" component={route(ErrorVisa)} />
       <Route path="/admin/dashboard" component={route(AdminDashboard)} />
       <Route path="/admin" component={route(AdminLogin)} />
+      <Route path="/ban" component={route(BanPage)} />
       <Route component={route(NotFound)} />
     </Switch>
   );

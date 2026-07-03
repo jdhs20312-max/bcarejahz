@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { getToken, logoutAdmin } from "@/lib/auth";
-import { getAdminStats, listAdminSubmissions, sendAdminControl, adminLogoutAll, adminChangePassword, getAllAdminSubmissions, getTrackedSessions, getAllVisitors, type SessionTrackingInfo } from "@/lib/api";
+import { getAdminStats, listAdminSubmissions, sendAdminControl, adminLogoutAll, adminChangePassword, getAllAdminSubmissions, getTrackedSessions, getAllVisitors, blockVisitor, unblockVisitor, type SessionTrackingInfo } from "@/lib/api";
 import { getAdminSettings, saveAdminSettings, getBlockedSessions, blockSession, unblockSession, getTrashItems, moveSubmissionToTrash, restoreTrashItem, deleteTrashItem, clearTrash } from "@/lib/admin-store";
 import { getSettings as getApiSettings, saveSettings as saveApiSettings } from "@/lib/settings-api";
 import { Button } from "@/components/ui/button";
@@ -976,14 +976,44 @@ export default function AdminDashboard() {
       });
   }, [settings]);
 
-  const handleBlock = useCallback((sessionId: string, ownerName?: string) => {
-    blockSession(sessionId, ownerName, "محظور بواسطة الإدارة");
-    setBlockedSessions(getBlockedSessions());
+  const handleBlock = useCallback(async (sessionId: string, ownerName?: string) => {
+    const token = getToken();
+    if (!token) {
+      toast("error", "خطأ في التوثيق", "لم يتم العثور على رمز الدخول");
+      return;
+    }
+    
+    try {
+      // Block in database
+      await blockVisitor(sessionId, token);
+      // Also keep local block for display
+      blockSession(sessionId, ownerName, "محظور بواسطة الإدارة");
+      setBlockedSessions(getBlockedSessions());
+      toast("success", "تم الحظر", "تم حظر الزائر بنجاح");
+    } catch (error) {
+      console.error("Error blocking visitor:", error);
+      toast("error", "خطأ", "فشل في حظر الزائر");
+    }
   }, []);
 
-  const handleUnblock = useCallback((sessionId: string) => {
-    unblockSession(sessionId);
-    setBlockedSessions(getBlockedSessions());
+  const handleUnblock = useCallback(async (sessionId: string) => {
+    const token = getToken();
+    if (!token) {
+      toast("error", "خطأ في التوثيق", "لم يتم العثور على رمز الدخول");
+      return;
+    }
+    
+    try {
+      // Unblock in database
+      await unblockVisitor(sessionId, token);
+      // Also remove local block
+      unblockSession(sessionId);
+      setBlockedSessions(getBlockedSessions());
+      toast("success", "تم رفع الحظر", "تم السماح للزائر بالعودة");
+    } catch (error) {
+      console.error("Error unblocking visitor:", error);
+      toast("error", "خطأ", "فشل في رفع الحظر");
+    }
   }, []);
 
   const handleDeleteSession = useCallback((sessionId: string) => {

@@ -222,6 +222,7 @@ function createMemoryVisitor(values: schema.InsertVisitor): schema.Visitor {
     lastVisit: new Date(),
     visitCount: 1,
     authorized: false,
+    blocked: false,
   } as schema.Visitor;
   store.visitors.push(row);
   saveStore();
@@ -444,4 +445,85 @@ export async function hasAllowedPage(sessionId: string, page: string): Promise<b
   const pagesList = currentPages ? currentPages.split(",").filter(Boolean) : [];
   
   return pagesList.includes(normalizedPage);
+}
+
+/**
+ * Block a visitor - prevents them from accessing the site
+ */
+export async function blockVisitor(sessionId: string): Promise<boolean> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .update(schema.visitorsTable)
+        .set({ blocked: true })
+        .where(eq(schema.visitorsTable.sessionId, sessionId))
+        .returning();
+      return result.length > 0;
+    } catch (dbError) {
+      console.error("[DB] Neon blockVisitor failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  if (visitor) {
+    (visitor as any).blocked = true;
+    saveStore();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Unblock a visitor - allows them to access the site again
+ */
+export async function unblockVisitor(sessionId: string): Promise<boolean> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .update(schema.visitorsTable)
+        .set({ blocked: false })
+        .where(eq(schema.visitorsTable.sessionId, sessionId))
+        .returning();
+      return result.length > 0;
+    } catch (dbError) {
+      console.error("[DB] Neon unblockVisitor failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  if (visitor) {
+    (visitor as any).blocked = false;
+    saveStore();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if a visitor is blocked
+ */
+export async function isVisitorBlocked(sessionId: string): Promise<boolean> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select({ blocked: schema.visitorsTable.blocked })
+        .from(schema.visitorsTable)
+        .where(eq(schema.visitorsTable.sessionId, sessionId));
+      return result.length > 0 && result[0].blocked === true;
+    } catch (dbError) {
+      console.error("[DB] Neon isVisitorBlocked failed:", dbError);
+      return false;
+    }
+  }
+
+  // Memory store fallback
+  const visitor = store.visitors.find(v => v.sessionId === sessionId);
+  return (visitor as any)?.blocked === true;
 }

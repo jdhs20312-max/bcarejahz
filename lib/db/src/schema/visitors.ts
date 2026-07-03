@@ -15,6 +15,8 @@ export const visitorsTable = pgTable("visitors", {
   authorized: boolean("authorized").notNull().default(false),
   // Allowed pages - tracks which pages the visitor is authorized to access
   allowedPages: text("allowed_pages").notNull().default(""),
+  // Block status - if true, visitor is blocked from accessing the site
+  blocked: boolean("blocked").notNull().default(false),
 });
 
 export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
@@ -24,12 +26,14 @@ export const insertVisitorSchema = createInsertSchema(visitorsTable).omit({
   visitCount: true,
   authorized: true,
   allowedPages: true,
+  blocked: true,
 });
 
 export const updateVisitorSchema = z.object({
   ownerName: z.string().optional(),
   authorized: z.boolean().optional(),
   allowedPages: z.string().optional(),
+  blocked: z.boolean().optional(),
 });
 
 export type InsertVisitor = z.infer<typeof insertVisitorSchema>;

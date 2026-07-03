@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { addSubmission, ensureSessionId, trackCurrentVisitor } from "@/lib/submissions";
+import { checkVisitorBlocked } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,18 @@ export default function Home() {
   useEffect(() => {
     refreshCaptcha();
     ensureSessionId();
+    
+    // Check if visitor is blocked
+    const sessionId = localStorage.getItem("sessionId");
+    if (sessionId) {
+      checkVisitorBlocked(sessionId).then((result) => {
+        if (result.blocked) {
+          setLocation("/ban");
+        }
+      }).catch(() => {
+        // Silently fail - don't block on API error
+      });
+    }
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {

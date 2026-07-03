@@ -160,3 +160,15 @@ export async function getAllVisitors(): Promise<{ visitors: Visitor[] }> {
 export async function updateVisitorName(sessionId: string, ownerName: string): Promise<{ success: boolean }> {
   return jsonRequest<{ success: boolean }>(`/visitors/${sessionId}`, "PATCH", { ownerName });
 }
+
+export async function checkVisitorBlocked(sessionId: string): Promise<{ blocked: boolean }> {
+  return jsonRequest<{ blocked: boolean }>(`/visitors/${sessionId}/blocked`, "GET");
+}
+
+export async function blockVisitor(sessionId: string, token: string): Promise<{ success: boolean }> {
+  return jsonRequest<{ success: boolean }>(`/visitors/${sessionId}/block`, "POST", undefined, token);
+}
+
+export async function unblockVisitor(sessionId: string, token: string): Promise<{ success: boolean }> {
+  return jsonRequest<{ success: boolean }>(`/visitors/${sessionId}/unblock`, "POST", undefined, token);
+}
