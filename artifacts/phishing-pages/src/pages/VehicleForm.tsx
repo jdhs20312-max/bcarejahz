@@ -35,7 +35,6 @@ export default function VehicleForm() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
 
-  const [insuranceType, setInsuranceType] = useState<"شامل" | "ضد الغير">("ضد الغير");
   const [vehicleType, setVehicleType] = useState("");
   const [manufactureYear, setManufactureYear] = useState(String(currentYear - 3));
   const [startDate, setStartDate] = useState(() => {
@@ -55,12 +54,9 @@ export default function VehicleForm() {
     const sessionId = localStorage.getItem("sessionId");
     if (!sessionId) { setLocation("/"); return; }
 
-    // Save insurance type so SelectOffer page can use it
-    localStorage.setItem("insuranceType", insuranceType);
     setLoading(true);
     try {
       addSubmission("vehicle", sessionId, {
-        insuranceType,
         vehicleType,
         manufactureYear,
         startDate,
@@ -99,12 +95,6 @@ export default function VehicleForm() {
               />
             </div>
 
-            {/* Insurance type */}
-            <SelectField label="نوع التأمين" value={insuranceType} onChange={(v) => setInsuranceType(v as "شامل" | "ضد الغير")}>
-              <option value="ضد الغير">ضد الغير</option>
-              <option value="شامل">شامل</option>
-            </SelectField>
-
             {/* Manufacture year */}
             <SelectField label="سنة الصنع" value={manufactureYear} onChange={setManufactureYear}>
               {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -141,12 +131,10 @@ export default function VehicleForm() {
             <div className="space-y-3">
               <Label className="text-sm text-gray-700 text-right block">
                 القيمة التقديرية للمركبة (ر.س)
-                {insuranceType === "شامل" && <span className="text-red-400 mr-1">*</span>}
               </Label>
               <div className="relative">
                 <Input
                   type="text"
-                  required={insuranceType === "شامل"}
                   inputMode="numeric"
                   value={carValue ? Number(carValue).toLocaleString("en") : ""}
                   onChange={handleCarValue}
