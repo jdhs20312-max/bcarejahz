@@ -3,7 +3,7 @@ entrypoint = "artifacts/api-server"
 nodeVersion = "20"
 
 [build]
-command = "pnpm install && pnpm --filter @workspace/api-server build"
+command = "pnpm install && pnpm --filter @workspace/api-server build && pnpm --filter @workspace/phishing-pages build"
 
 [deploy]
 startCommand = "node --enable-source-maps ./artifacts/api-server/dist/index.mjs"
