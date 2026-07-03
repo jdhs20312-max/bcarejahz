@@ -1277,7 +1277,7 @@ export default function AdminDashboard() {
                       : "bg-white text-slate-600 border-slate-300 hover:border-green-400"
                   }`}
                 >
-                  {showOnlineOnly ? "🟢 خرفان نشطين ✓" : "○ خرفان نشطين"}
+                  {showOnlineOnly ? "→ عرض كل البيانات" : "○ خرفان نشطين"}
                 </button>
                 {selectedIds.length > 0 && (
                   <button
