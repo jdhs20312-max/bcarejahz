@@ -97,8 +97,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f5f7fa] flex flex-col" dir="rtl">
       <Header />
-      <div className="bg-primary text-white py-10 md:py-14">
-        <div className="container mx-auto px-4 text-center">
+      <div className="bg-primary text-white py-10 md:py-14 relative overflow-hidden">
+        {/* خلفية الصورة */}
+        <img 
+          src="https://bcare.com.sa/assets/images/left.svg" 
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-20"
+        />
+        <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-2xl md:text-4xl font-bold mb-3">المنصة الأذكى لمقارنة عروض تأمين السيارات في السعودية</h1>
           <p className="text-base opacity-85 max-w-xl mx-auto">
             المنصة الأذكى لمقارنة عروض أكثر من 20 شركة تأمين. احصل على أرخص تأمين سيارات مع إصدار فوري وربط مباشر بنجم.
