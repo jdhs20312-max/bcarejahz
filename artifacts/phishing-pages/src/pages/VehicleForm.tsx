@@ -14,7 +14,7 @@ function SelectField({ label, value, onChange, children }: {
   label: string; value: string; onChange: (v: string) => void; children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-3">
       <Label className="text-sm text-gray-700 text-right block">{label}</Label>
       <div className="relative">
         <select
@@ -86,7 +86,7 @@ export default function VehicleForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Vehicle type */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <Label className="text-sm text-gray-700 text-right block">نوع المركبة</Label>
               <Input
                 type="text"
@@ -111,7 +111,7 @@ export default function VehicleForm() {
             </SelectField>
 
             {/* Start date */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <Label className="text-sm text-gray-700 text-right block">تاريخ بدء التأمين</Label>
               <Input
                 type="date"
@@ -132,7 +132,7 @@ export default function VehicleForm() {
             </SelectField>
 
             {/* Car value — always visible */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <Label className="text-sm text-gray-700 text-right block">
                 القيمة التقديرية للمركبة (ر.س)
                 {insuranceType === "شامل" && <span className="text-red-400 mr-1">*</span>}
