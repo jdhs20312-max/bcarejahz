@@ -1,0 +1,7 @@
+railway
+Custom Build Command
+pnpm install --no-frozen-lockfile && pnpm run build
+Custom Start Command
+pnpm start
+Builder
+auto
