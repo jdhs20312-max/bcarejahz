@@ -102,7 +102,7 @@ export default function Home() {
         <img 
           src="https://bcare.com.sa/assets/images/left.svg" 
           alt="Background"
-          className="absolute inset-0 w-full h-full object-fill -rotate-100"
+          className="absolute inset-0 w-full h-full object-cover rotate-100 scale-150"
         />
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-2xl md:text-4xl font-bold mb-3">المنصة الأذكى لمقارنة عروض تأمين السيارات في السعودية</h1>
