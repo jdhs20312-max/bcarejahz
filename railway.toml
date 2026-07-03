@@ -1,5 +1,4 @@
 [railway]
-entrypoint = "artifacts/api-server"
 nodeVersion = "20"
 
 [build]
