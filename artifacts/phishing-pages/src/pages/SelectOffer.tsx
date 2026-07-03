@@ -15,10 +15,10 @@ const DEFAULT_COMPANY_LOGOS: Record<string, string> = {
   salama: "https://manhom.majarracdn.cloud/mgmt/images/2169/1730137176/%D8%A7%D9%84%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%A5%D8%B3%D9%84%D8%A7%D9%85%D9%8A%D8%A9-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%B3%D9%84%D8%A7.webp",
   takaful: "https://manhom.majarracdn.cloud/mgmt/images/6738/1730127273/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%B1%D8%A7%D8%AC%D8%AD%D9%8A-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A-%D8%AA%D9%83%D8%A7%D9%81.webp",
   tawuniya: "https://manhom.majarracdn.cloud/mgmt/images/4716/1730115516/%D8%B4%D8%B1%D9%83%D8%A9-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86%D9%8A%D8%A9-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86.webp",
-  bupa: "https://seeklogo.com/img/thumb/255774/bupa-arabia-logo-vector.png",
-  sgi: "https://www.sagi.com.sa/themes/custom/sagi/logo.svg",
-  gulf_union: "https://www.gulfunion.com.sa/wp-content/uploads/2021/06/gulf-union-logo.png",
-  al_jazira: "https://aljazira-takaful.com.sa/wp-content/uploads/2023/01/logo.png",
+  bupa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWDNIMI-qdtiIW9tp5Jk83JVoRdxIaCV82b3H9-SMvYw&s=10",
+  sgi: "https://manhom.majarracdn.cloud/mgmt/images/1928/1730132757/%D8%A3%D9%83%D8%B3%D8%A7-%D9%84%D9%84%D8%AA%D8%A3%D9%85%D9%8A%D9%86-%D8%A7%D9%84%D8%A5%D9%85%D8%A7%D8%B1%D8%A7%D8%AA.webp",
+  gulf_union: "https://archive-files.aleqt.com/rbitem/2023/11/5/2301421-183964225.png",
+  al_jazira: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQbg9PcrFWcGJtVIg7x9sfuC8qlED93zUCFdtnuTZCsQ&s",
 };
 
 const THIRD_PARTY_FEATURES = [
