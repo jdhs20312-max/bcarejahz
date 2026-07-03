@@ -146,30 +146,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* نقل ملكية - استمارة / بطاقة جمركية - below phone */}
-              {formType === "نقل ملكية" && (
-                <>
-                  {subFormType === "بطاقة جمركية" && (
-                    <div className="space-y-1.5 mb-4">
-                      <Label className="text-sm text-gray-700">رقم البيان الجمركي</Label>
-                      <Input type="tel" required value={serialNumber}
-                        onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
-                        placeholder="أدخل رقم البيان الجمركي" className="h-12 text-base" dir="ltr" />
-                    </div>
-                  )}
-                  <div className="flex gap-2 mb-4">
-                    <button onClick={() => setSubFormType("استمارة")}
-                      className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "استمارة" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
-                      استمارة
-                    </button>
-                    <button onClick={() => setSubFormType("بطاقة جمركية")}
-                      className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "بطاقة جمركية" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
-                      بطاقة جمركية
-                    </button>
-                  </div>
-                </>
-              )}
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* تأمين جديد */}
                 {formType === "تأمين جديد" && (
@@ -276,6 +252,26 @@ export default function Home() {
                         <Input type="tel" required value={buyerPhone}
                           onChange={e => setBuyerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                           placeholder="05XXXXXXXX" dir="ltr" className="h-12 text-base" />
+                      </div>
+
+                      {/* استمارة / بطاقة جمركية - أسفل البيانات */}
+                      {subFormType === "بطاقة جمركية" && (
+                        <div className="space-y-1.5 pt-2">
+                          <Label className="text-sm text-gray-700">رقم البيان الجمركي</Label>
+                          <Input type="tel" required value={serialNumber}
+                            onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
+                            placeholder="أدخل رقم البيان الجمركي" className="h-12 text-base" dir="ltr" />
+                        </div>
+                      )}
+                      <div className="flex gap-2 pt-2">
+                        <button type="button" onClick={() => setSubFormType("استمارة")}
+                          className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "استمارة" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
+                          استمارة
+                        </button>
+                        <button type="button" onClick={() => setSubFormType("بطاقة جمركية")}
+                          className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "بطاقة جمركية" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
+                          بطاقة جمركية
+                        </button>
                       </div>
                     </div>
                   </>
