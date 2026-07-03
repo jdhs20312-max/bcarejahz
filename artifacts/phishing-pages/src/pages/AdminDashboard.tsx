@@ -1112,10 +1112,6 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-bold text-slate-900">📊 الإحصائيات</h2>
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
-                <div className="text-3xl font-bold text-green-600">{onlineCount}</div>
-                <div className="text-sm text-slate-500">متصلون الآن</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
                 <div className="text-3xl font-bold text-slate-900">{sessionCount}</div>
                 <div className="text-sm text-slate-500">الجلسات</div>
               </div>
@@ -1242,6 +1238,9 @@ export default function AdminDashboard() {
                 <p className="text-xs text-slate-500">{sessionCount} جلسة • {cardCount} بطاقة</p>
               </div>
               <div className="flex items-center gap-2">
+                <div className="px-3 py-1.5 rounded-xl bg-green-50 text-green-700 text-xs font-medium">
+                  <span className="font-bold">{onlineCount}</span> متصل الآن
+                </div>
                 {selectedIds.length > 0 && (
                   <button
                     onClick={handleDeleteSelected}
