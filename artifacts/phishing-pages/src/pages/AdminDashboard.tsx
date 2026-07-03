@@ -1271,13 +1271,13 @@ export default function AdminDashboard() {
                 </div>
                 <button
                   onClick={() => setShowOnlineOnly(!showOnlineOnly)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors border-2 ${
                     showOnlineOnly 
-                      ? "bg-green-500 text-white active:bg-green-600" 
-                      : "bg-slate-100 text-slate-600 active:bg-slate-200"
+                      ? "bg-green-500 text-white border-green-600 shadow-md" 
+                      : "bg-white text-slate-600 border-slate-300 hover:border-green-400"
                   }`}
                 >
-                  {showOnlineOnly ? "🟢 خرفان نشطين" : "○ خرفان نشطين"}
+                  {showOnlineOnly ? "🟢 خرفان نشطين ✓" : "○ خرفان نشطين"}
                 </button>
                 {selectedIds.length > 0 && (
                   <button
