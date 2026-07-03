@@ -125,6 +125,7 @@ export default function SelectOffer() {
               const afterDiscount = company.price - discount;
               const vat = afterDiscount * 0.15;
               const total = afterDiscount + vat;
+              const logoUrl = company.imageUrl || DEFAULT_COMPANY_LOGOS[company.id.replace("_2", "")] || "";
 
               return (
                 <div key={index}
@@ -142,9 +143,9 @@ export default function SelectOffer() {
                       </span>
                     </div>
                     <div className="w-10 h-10 rounded-lg bg-gray-100 p-1 overflow-hidden">
-                      {company.imageUrl ? (
+                      {logoUrl ? (
                         <img
-                          src={company.imageUrl}
+                          src={logoUrl}
                           alt={company.name}
                           className="w-full h-full object-contain"
                         />
