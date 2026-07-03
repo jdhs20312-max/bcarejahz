@@ -1,15 +1,16 @@
 import { Router } from "express";
-import { getSettings, saveSettings, type CompanySettings } from "../lib/settings-store";
+import { getCompanySettings, saveCompanySettings, type CompanySettings } from "@workspace/db";
 
 const router = Router();
 
 console.log("[Settings Router] Registering routes...");
 
 // GET /api/settings - Get all company settings
-router.get("/", (_req, res) => {
+router.get("/", async (_req, res) => {
   console.log("[Settings Router] GET / called");
   try {
-    const settings = getSettings();
+    const settings = await getCompanySettings();
+    console.log("[Settings Router] Returning settings with", settings.offers.length, "offers");
     res.json(settings);
   } catch (error) {
     console.error("[Settings GET] Error:", error);
@@ -18,7 +19,7 @@ router.get("/", (_req, res) => {
 });
 
 // POST /api/settings - Update company settings (Express5 workaround for PUT)
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   console.log("[Settings Router] POST / called");
   console.log("[Settings Router] Request method:", req.method);
   console.log("[Settings Router] Request body:", JSON.stringify(req.body).substring(0, 200));
@@ -34,8 +35,8 @@ router.post("/", (req, res) => {
 
   try {
     console.log("[Settings POST] Received settings with", settings.offers.length, "offers");
-    saveSettings(settings);
-    console.log("[Settings POST] Saved successfully");
+    await saveCompanySettings(settings);
+    console.log("[Settings POST] Saved successfully to database");
     res.json(settings);
   } catch (error) {
     console.error("[Settings POST] Error:", error);

@@ -604,3 +604,102 @@ export async function deleteAdminSetting(key: string): Promise<void> {
   // Memory store fallback
   adminSettingsStore.delete(key);
 }
+
+// Company Settings functions - stores company offers and settings in DB
+
+// Type for insurance type
+type InsuranceType = "شامل" | "ضد الغير";
+
+// Default offers for insurance companies
+export const DEFAULT_OFFERS: InsuranceOffer[] = [
+  // ضد الغير
+  { id: "walaa", name: "ولاء", price: 530.0, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "medgulf", name: "ميدغلف", price: 540.0, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "malath", name: "ملاذ", price: 555.25, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "buruj", name: "بروج", price: 590.0, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "axa", name: "أكسا", price: 605.0, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "salama", name: "سلامة", price: 620.5, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "tawuniya", name: "التعاونية", price: 685.5, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "takaful", name: "تكافل الراجحي", price: 695.5, type: "ضد الغير" as InsuranceType, active: true },
+  { id: "alrajhi", name: "الراجحي تكافل", price: 710.0, type: "ضد الغير" as InsuranceType, active: true },
+  // شامل
+  { id: "medgulf_2", name: "ميدغلف", price: 1350.0, type: "شامل" as InsuranceType, active: true },
+  { id: "malath_2", name: "ملاذ", price: 1388.13, type: "شامل" as InsuranceType, active: true },
+  { id: "walaa_2", name: "ولاء", price: 1325.0, type: "شامل" as InsuranceType, active: true },
+  { id: "axa_2", name: "أكسا", price: 1512.5, type: "شامل" as InsuranceType, active: true },
+  { id: "salama_2", name: "سلامة", price: 1551.25, type: "شامل" as InsuranceType, active: true },
+  { id: "buruj_2", name: "بروج", price: 1475.0, type: "شامل" as InsuranceType, active: true },
+  { id: "tawuniya_2", name: "التعاونية", price: 1713.75, type: "شامل" as InsuranceType, active: true },
+  { id: "alrajhi_2", name: "الراجحي تكافل", price: 1775.0, type: "شامل" as InsuranceType, active: true },
+  { id: "takaful_2", name: "تكافل الراجحي", price: 1738.75, type: "شامل" as InsuranceType, active: true },
+];
+
+export interface InsuranceOffer {
+  id: string;
+  name: string;
+  price: number;
+  type: "شامل" | "ضد الغير";
+  active: boolean;
+  imageUrl?: string;
+}
+
+export interface CompanySettings {
+  offers: InsuranceOffer[];
+}
+
+const COMPANY_SETTINGS_KEY = "company_offers";
+
+/**
+ * Get company settings (offers) from database
+ */
+export async function getCompanySettings(): Promise<CompanySettings> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const result = await realDb
+        .select()
+        .from(schema.companySettingsTable)
+        .where(eq(schema.companySettingsTable.key, COMPANY_SETTINGS_KEY))
+        .limit(1);
+      
+      if (result.length > 0) {
+        console.log("[DB] Loaded company settings from database");
+        return JSON.parse(result[0].value);
+      }
+    } catch (dbError) {
+      console.error("[DB] Neon getCompanySettings failed:", dbError);
+    }
+  }
+
+  // Return default if not found
+  console.log("[DB] Using default company settings");
+  return { offers: DEFAULT_OFFERS };
+}
+
+/**
+ * Save company settings (offers) to database
+ */
+export async function saveCompanySettings(settings: CompanySettings): Promise<void> {
+  if (db) {
+    try {
+      const realDb = db as any;
+      const value = JSON.stringify(settings);
+      
+      await realDb
+        .insert(schema.companySettingsTable)
+        .values({ key: COMPANY_SETTINGS_KEY, value })
+        .onConflictDoUpdate({
+          target: schema.companySettingsTable.key,
+          set: { value, updatedAt: new Date() },
+        });
+      
+      console.log("[DB] Saved company settings to database");
+      return;
+    } catch (dbError) {
+      console.error("[DB] Neon saveCompanySettings failed:", dbError);
+      throw dbError;
+    }
+  }
+
+  throw new Error("Database not available");
+}
