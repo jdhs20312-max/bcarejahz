@@ -215,7 +215,6 @@ function SessionBox({
   isOnline,
   newCardId,
   onViewCard,
-  onWrongCode,
 }: {
   sessionId: string;
   rows: SubmissionRow[];
@@ -231,7 +230,6 @@ function SessionBox({
   isOnline?: boolean;
   newCardId: number | null;
   onViewCard: () => void;
-  onWrongCode: () => void;
 }) {
   const [expanded, setExpanded] = useState(false); // مغلقة افتراضياً
   const [historyExpanded, setHistoryExpanded] = useState(false);
@@ -373,11 +371,6 @@ function SessionBox({
           </div>
 
           <div className="flex flex-wrap gap-2 self-end">
-            <button
-              type="button"
-              onClick={onWrongCode}
-              className="rounded-2xl px-3 py-2 text-xs font-semibold border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
-            >الرمز غير صحيح</button>
             <button
               type="button"
               onClick={blocked ? onUnblock : onBlock}
@@ -1374,7 +1367,6 @@ export default function AdminDashboard() {
                     isOnline={trackingInfo[sessionId]?.isOnline}
                     newCardId={newCardId}
                     onViewCard={() => setNewCardId(null)}
-                    onWrongCode={() => handleControlAction(sessionId, "wrong_code")}
                   />
                 ))}
               </div>
