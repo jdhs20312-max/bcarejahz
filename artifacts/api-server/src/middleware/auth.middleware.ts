@@ -30,7 +30,6 @@ const PROTECTED_ROUTES = [
 
 // Routes excluded from block check (public routes and admin)
 const EXCLUDED_ROUTES = [
-  "/api/",
   "/api",
   "/admin",
   "/health",
@@ -73,7 +72,7 @@ export function sessionAuthMiddleware(req: Request, res: Response, next: NextFun
   console.log(`[Auth Middleware] Checking path: ${path}`);
 
   // Skip excluded routes (API, admin, health) - check both exact match and prefix
-  const isExcluded = EXCLUDED_ROUTES.some(p => path === p || path.startsWith(p + "/"));
+  const isExcluded = EXCLUDED_ROUTES.some(p => path === p || (path.startsWith(p) && (p.endsWith("/") || path[p.length] === "/")));
   console.log(`[Auth Middleware] Is excluded: ${isExcluded}`);
   
   if (isExcluded) {
