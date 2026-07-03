@@ -766,10 +766,6 @@ export default function AdminDashboard() {
   // Filter: show only online sessions
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
-  // Welcome message for testing deployment
-  console.log("🚀 Admin Dashboard Loaded - Railway Deployment Test Success!");
-  console.log("🕐 Loaded at:", new Date().toISOString());
-
   const sessions = useMemo(() => {
     const trashedIds = new Set(trashItems.map((item) => item.id));
     const grouped: Record<string, SubmissionRow[]> = {};
