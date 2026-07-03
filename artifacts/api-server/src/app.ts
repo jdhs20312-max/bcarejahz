@@ -15,8 +15,25 @@ const app: Express = express();
 const uiDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "phishing-pages", "dist");
 const hasUiDist = fs.existsSync(uiDist);
 
-// Security headers with helmet
-app.use(helmet());
+// Security headers with helmet - CSP allowing external images
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        imgSrc: ["*", "data:", "https:", "blob:"],
+        connectSrc: ["'self'", "ws:", "wss:", "https:"],
+        mediaSrc: ["'self'", "data:", "blob:"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        formAction: ["'self'"],
+      },
+    },
+  })
+);
 
 // Remove x-powered-by header
 app.disable("x-powered-by");
