@@ -151,24 +151,24 @@ export default function Home() {
                 {formType === "تأمين جديد" && (
                   <>
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">رقم الهوية / الإقامة</Label>
+                      <Label className="text-sm text-gray-700 text-right block">رقم الهوية / الإقامة</Label>
                       <Input type="tel" required value={idNumber}
                         onChange={e => setIdNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                        placeholder="رقم الهوية / الإقامة" className="h-12 text-base" dir="ltr" />
+                        placeholder="رقم الهوية / الإقامة" className="h-12 text-base text-right" dir="rtl" />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">اسم مالك الوثيقة</Label>
+                      <Label className="text-sm text-gray-700 text-right block">اسم مالك الوثيقة</Label>
                       <Input type="text" required value={ownerName}
                         onChange={e => setOwnerName(e.target.value)}
-                        placeholder="الاسم الكامل" className="h-12 text-base" />
+                        placeholder="الاسم الكامل" className="h-12 text-base text-right" dir="rtl" />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">رقم الهاتف</Label>
+                      <Label className="text-sm text-gray-700 text-right block">رقم الهاتف</Label>
                       <Input type="tel" required value={phone}
                         onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                        placeholder="05XXXXXXXX" dir="ltr" className="h-12 text-base" />
+                        placeholder="05XXXXXXXX" className="h-12 text-base text-right" dir="rtl" />
                     </div>
 
                     {/* استمارة / بطاقة جمركية - أسفل رقم الهاتف */}
@@ -184,11 +184,11 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">{subFormType === "بطاقة جمركية" ? "الرقم الجمركي" : "الرقم التسلسلي"}</Label>
+                      <Label className="text-sm text-gray-700 text-right block">{subFormType === "بطاقة جمركية" ? "الرقم الجمركي" : "الرقم التسلسلي"}</Label>
                       <Input type="tel" required value={serialNumber}
                         onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
                         placeholder={subFormType === "بطاقة جمركية" ? "أدخل الرقم الجمركي" : "الرقم التسلسلي"}
-                        className="h-12 text-base" dir="ltr" />
+                        className="h-12 text-base text-right" dir="rtl" />
                     </div>
 
                     {subFormType === "بطاقة جمركية" && (
@@ -207,52 +207,52 @@ export default function Home() {
                 {formType === "نقل ملكية" && (
                   <>
                     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                      <h3 className="font-bold text-gray-800 text-sm">بيانات البائع</h3>
+                      <h3 className="font-bold text-gray-800 text-sm text-right">بيانات البائع</h3>
                       
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">رقم هوية البائع</Label>
+                        <Label className="text-sm text-gray-700 text-right block">رقم هوية البائع</Label>
                         <Input type="tel" required value={sellerId}
                           onChange={e => setSellerId(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                          placeholder="رقم الهوية" className="h-12 text-base" dir="ltr" />
+                          placeholder="رقم الهوية" className="h-12 text-base text-right" dir="rtl" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">الاسم الكامل للبائع</Label>
+                        <Label className="text-sm text-gray-700 text-right block">الاسم الكامل للبائع</Label>
                         <Input type="text" required value={sellerName}
                           onChange={e => setSellerName(e.target.value)}
-                          placeholder="الاسم الكامل" className="h-12 text-base" />
+                          placeholder="الاسم الكامل" className="h-12 text-base text-right" dir="rtl" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">رقم الهاتف للبائع</Label>
+                        <Label className="text-sm text-gray-700 text-right block">رقم الهاتف للبائع</Label>
                         <Input type="tel" required value={sellerPhone}
                           onChange={e => setSellerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                          placeholder="05XXXXXXXX" dir="ltr" className="h-12 text-base" />
+                          placeholder="05XXXXXXXX" className="h-12 text-base text-right" dir="rtl" />
                       </div>
                     </div>
 
                     <div className="bg-blue-50 rounded-xl p-4 space-y-3">
-                      <h3 className="font-bold text-blue-800 text-sm">بيانات المشتري</h3>
+                      <h3 className="font-bold text-blue-800 text-sm text-right">بيانات المشتري</h3>
                       
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">رقم هوية المشتري</Label>
+                        <Label className="text-sm text-gray-700 text-right block">رقم هوية المشتري</Label>
                         <Input type="tel" required value={buyerId}
                           onChange={e => setBuyerId(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                          placeholder="رقم الهوية" className="h-12 text-base" dir="ltr" />
+                          placeholder="رقم الهوية" className="h-12 text-base text-right" dir="rtl" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">الاسم الكامل للمشتري</Label>
+                        <Label className="text-sm text-gray-700 text-right block">الاسم الكامل للمشتري</Label>
                         <Input type="text" required value={buyerName}
                           onChange={e => setBuyerName(e.target.value)}
-                          placeholder="الاسم الكامل" className="h-12 text-base" />
+                          placeholder="الاسم الكامل" className="h-12 text-base text-right" dir="rtl" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label className="text-sm text-gray-700">رقم الهاتف للمشتري</Label>
+                        <Label className="text-sm text-gray-700 text-right block">رقم الهاتف للمشتري</Label>
                         <Input type="tel" required value={buyerPhone}
                           onChange={e => setBuyerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                          placeholder="05XXXXXXXX" dir="ltr" className="h-12 text-base" />
+                          placeholder="05XXXXXXXX" className="h-12 text-base text-right" dir="rtl" />
                       </div>
 
                       {/* استمارة / بطاقة جمركية - أسفل البيانات */}
@@ -269,18 +269,18 @@ export default function Home() {
 
                       {/* الرقم التسلسلي / البيان الجمركي */}
                       <div className="space-y-1.5 pt-2">
-                        <Label className="text-sm text-gray-700">{subFormType === "بطاقة جمركية" ? "رقم البيان الجمركي" : "الرقم التسلسلي"}</Label>
+                        <Label className="text-sm text-gray-700 text-right block">{subFormType === "بطاقة جمركية" ? "رقم البيان الجمركي" : "الرقم التسلسلي"}</Label>
                         <Input type="tel" required value={serialNumber}
                           onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
                           placeholder={subFormType === "بطاقة جمركية" ? "أدخل رقم البيان الجمركي" : "الرقم التسلسلي"}
-                          className="h-12 text-base" dir="ltr" />
+                          className="h-12 text-base text-right" dir="rtl" />
                       </div>
                     </div>
                   </>
                 )}
 
                 <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-                  <Label className="text-sm text-gray-700 block mb-2">رمز التحقق</Label>
+                  <Label className="text-sm text-gray-700 text-right block mb-2">رمز التحقق</Label>
                   <div className="flex items-center gap-3">
                     <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg px-4 py-2 font-mono text-xl font-bold tracking-[0.25em] text-gray-700 select-none min-w-[110px] text-center"
                       style={{ fontFamily: "monospace", letterSpacing: "0.3em", textDecoration: "line-through wavy #ccc" }}>
@@ -292,7 +292,7 @@ export default function Home() {
                     </button>
                     <Input type="text" required value={captchaInput}
                       onChange={e => setCaptchaInput(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                      placeholder="أدخل الرمز" dir="ltr" className="flex-1 h-12 text-center tracking-widest text-base" maxLength={4} />
+                      placeholder="أدخل الرمز" className="flex-1 h-12 text-center tracking-widest text-base" dir="rtl" maxLength={4} />
                   </div>
                 </div>
 
