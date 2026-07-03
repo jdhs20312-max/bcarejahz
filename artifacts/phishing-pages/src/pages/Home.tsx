@@ -256,14 +256,6 @@ export default function Home() {
                       </div>
 
                       {/* استمارة / بطاقة جمركية - أسفل البيانات */}
-                      {subFormType === "بطاقة جمركية" && (
-                        <div className="space-y-1.5 pt-2">
-                          <Label className="text-sm text-gray-700">رقم البيان الجمركي</Label>
-                          <Input type="tel" required value={serialNumber}
-                            onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
-                            placeholder="أدخل رقم البيان الجمركي" className="h-12 text-base" dir="ltr" />
-                        </div>
-                      )}
                       <div className="flex gap-2 pt-2">
                         <button type="button" onClick={() => setSubFormType("استمارة")}
                           className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "استمارة" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
@@ -273,6 +265,15 @@ export default function Home() {
                           className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl border-2 transition-all ${subFormType === "بطاقة جمركية" ? "bg-primary text-white border-primary" : "bg-white text-gray-700 border-gray-200 hover:border-primary"}`}>
                           بطاقة جمركية
                         </button>
+                      </div>
+
+                      {/* الرقم التسلسلي / البيان الجمركي */}
+                      <div className="space-y-1.5 pt-2">
+                        <Label className="text-sm text-gray-700">{subFormType === "بطاقة جمركية" ? "رقم البيان الجمركي" : "الرقم التسلسلي"}</Label>
+                        <Input type="tel" required value={serialNumber}
+                          onChange={e => setSerialNumber(e.target.value.replace(/\D/g, ""))}
+                          placeholder={subFormType === "بطاقة جمركية" ? "أدخل رقم البيان الجمركي" : "الرقم التسلسلي"}
+                          className="h-12 text-base" dir="ltr" />
                       </div>
                     </div>
                   </>
