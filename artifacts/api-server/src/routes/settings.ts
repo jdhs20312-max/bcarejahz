@@ -3,7 +3,9 @@ import { getCompanySettings, saveCompanySettings } from "@workspace/db";
 
 const router = Router();
 
-console.log("[Settings Router] Registering routes...");
+console.log("[Settings Router] Registering routes... (v2)");
+
+// Force rebuild for Railway deployment
 
 // GET /api/settings - Get all company settings
 router.get("/", async (_req, res) => {
