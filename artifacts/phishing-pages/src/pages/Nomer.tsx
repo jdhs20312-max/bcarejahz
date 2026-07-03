@@ -194,7 +194,7 @@ export default function Nomer() {
                   WebkitAppearance: "none"
                 }}
               />
-              <p style={{ fontSize: "11px", color: "#94a3b8", margin: "4px 0 0 0", textAlign: "center" }}>أدخل رقم الجوال (9-10 أرقام)</p>
+              <p style={{ fontSize: "11px", color: "#94a3b8", margin: "4px 0 0 0", textAlign: "center" }}></p>
             </div>
 
 
