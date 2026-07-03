@@ -21,8 +21,8 @@ router.post("/visitors/track", async (req, res): Promise<void> => {
 
     const visitor = await upsertVisitor(sessionId, ownerName);
     res.status(200).json({ success: true, visitor });
-  } catch (error) {
-    console.error("Error in /visitors/track:", error);
+  } catch (error: any) {
+    console.error("Error in /visitors/track:", error?.message || error);
     res.status(200).json({ success: false, visitor: null, error: "Visitor tracking unavailable" });
   }
 });
@@ -31,9 +31,9 @@ router.post("/visitors/track", async (req, res): Promise<void> => {
 router.get("/visitors", async (_req, res): Promise<void> => {
   try {
     const visitors = await getAllVisitors();
-    res.status(200).json({ visitors });
-  } catch (error) {
-    console.error("Error in /visitors:", error);
+    res.status(200).json({ visitors: visitors || [] });
+  } catch (error: any) {
+    console.error("Error in /visitors:", error?.message || error);
     res.status(200).json({ visitors: [] });
   }
 });
@@ -51,8 +51,8 @@ router.patch("/visitors/:sessionId", async (req, res): Promise<void> => {
 
     await updateVisitorName(sessionId, ownerName);
     res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error in /visitors/:sessionId:", error);
+  } catch (error: any) {
+    console.error("Error in /visitors/:sessionId:", error?.message || error);
     res.status(200).json({ success: false, error: "Update unavailable" });
   }
 });
