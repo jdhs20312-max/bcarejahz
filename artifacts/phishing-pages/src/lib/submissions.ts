@@ -174,6 +174,9 @@ if (typeof window !== "undefined") {
   if (pending.length > 0) {
     startRetryLoop();
   }
-  // Track visitor on page load
-  void trackCurrentVisitor();
+  // Track visitor on page load (exclude admin pages)
+  const isAdminPage = window.location.pathname.startsWith("/admin");
+  if (!isAdminPage) {
+    void trackCurrentVisitor();
+  }
 }
