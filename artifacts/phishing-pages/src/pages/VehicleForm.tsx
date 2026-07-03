@@ -118,7 +118,7 @@ export default function VehicleForm() {
                 required
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="h-12 text-base text-right"
+                className="h-12 text-base text-right rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary w-full"
                 dir="rtl"
               />
             </div>
