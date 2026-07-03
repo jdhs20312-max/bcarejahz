@@ -132,10 +132,8 @@ export async function insertSubmission(values: schema.InsertSubmission): Promise
       const realDb = db as any;
       const [row] = await realDb.insert(submissionsTable).values(values).returning();
       return row;
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
       // Fallback to memory store if Neon fails
     }
   }
@@ -165,10 +163,8 @@ export async function listSubmissions(options: ListOptions = {}): Promise<schema
       }
 
       return query;
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
     }
   }
 
@@ -193,10 +189,8 @@ export async function countSubmissions(options: ListOptions = {}): Promise<numbe
 
       const [{ value }] = await query;
       return Number(value);
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
     }
   }
 
@@ -208,10 +202,8 @@ export async function getAllSubmissions(): Promise<schema.Submission[]> {
     try {
       const realDb = db as any;
       return realDb.select().from(submissionsTable).orderBy(desc(submissionsTable.createdAt));
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
     }
   }
 
@@ -262,10 +254,8 @@ export async function upsertVisitor(sessionId: string, ownerName?: string): Prom
           .returning();
         return inserted;
       }
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
     }
   }
 
@@ -287,9 +277,7 @@ export async function getAllVisitors(): Promise<schema.Visitor[]> {
       const realDb = db as any;
       return await realDb.select().from(schema.visitorsTable).orderBy(desc(schema.visitorsTable.lastVisit));
     } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory store:", dbError?.message || dbError);
-      // Return empty array on error instead of crashing
-      return [];
+      console.error("[DB] Neon getAllVisitors failed, using memory store:", dbError?.message || dbError);
     }
   }
 
@@ -305,10 +293,8 @@ export async function updateVisitorName(sessionId: string, ownerName: string): P
         .set({ ownerName })
         .where(eq(schema.visitorsTable.sessionId, sessionId));
       return;
-    } catch (dbError: any) {
-      console.error("[DB] Neon query failed, falling back to memory:", dbError?.message || dbError);
-      // Return empty array on error
-      return createMemoryVisitor({ sessionId, ownerName });
+    } catch (dbError) {
+      console.error("[DB] Neon query failed, falling back to memory store:", dbError);
     }
   }
 
